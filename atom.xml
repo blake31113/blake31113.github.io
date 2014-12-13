@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title><![CDATA[Single.Bike.DSLR]]></title>
+  <subtitle><![CDATA[by Blake]]></subtitle>
+  <link href="/atom.xml" rel="self"/>
+  <link href="http://blake31113.github.io/"/>
+  <updated>2014-12-13T15:02:46.324Z</updated>
+  <id>http://blake31113.github.io/</id>
+  
+  <author>
+    <name><![CDATA[Blake K.C. LIN]]></name>
+    <email><![CDATA[blake31113@gmail.com]]></email>
+  </author>
+  
+  <generator uri="http://zespia.tw/hexo/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[[Linux-Kernel][新增System Call]]]></title>
+    <link href="http://blake31113.github.io/2014/11/17/%5BLinux-Kernel%5D%5B%E6%96%B0%E5%A2%9ESystem%20Call%5D/"/>
+    <id>http://blake31113.github.io/2014/11/17/[Linux-Kernel][新增System Call]/</id>
+    <published>2014-11-17T02:09:00.000Z</published>
+    <updated>2014-11-17T14:34:35.000Z</updated>
+    <content type="html"><![CDATA[<h3 id="Linux-Kernel_新增System_Call">Linux-Kernel 新增System Call</h3>
+<p>我的環境是 OS:Ubuntu 14.04 LTS(32bits-i386)  CPU:i7-2600<br>    Linux版本為linux-3.10.60</p>
+<ol>
+<li>到Linux Kernel Archives 下載Source Code到Desktop <a href="https://www.kernel.org/" target="_blank" rel="external">Link</a> ，我是下載3.10.60.tar.xz版本</li>
+<li>解壓linux-3.10.60.tar.xz<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">xz <span class="operator">-d</span> linux-<span class="number">3.10</span>.<span class="number">60</span>.tar.xz</div></pre></td></tr></table></figure></li>
+<li>解壓linux-3.10.60.tar<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="title">tar</span> xvf linux-<span class="number">3</span>.<span class="number">10</span>.<span class="number">60</span>.tar</div></pre></td></tr></table></figure></li>
+<li>到~/Desktop/linux-3.10.60/arch/x86/kernel建立helloworld.c的程式，其就是我們的System Call<figure class="highlight"><figcaption><span>~/Desktop/linux-3.10.60/arch/x86/kernel</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;linux/linkage.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;linux/kernel.h&gt;</span></div><div class="line"></div><div class="line">asmlinkage <span class="keyword">int</span> sys_helloworld(<span class="keyword">void</span>) </div><div class="line">{</div><div class="line">	printk(KERN_EMERG <span class="string">"Hello World"</span>);</div><div class="line">	<span class="keyword">return</span> <span class="number">1</span>;</div><div class="line">}</div></pre></td></tr></table></figure></li>
+<li>到~/Desktop/linux-3.10.60/include/linux/syscalls.h中增加<figure class="highlight"><figcaption><span>~/Desktop/linux-3.10.60/include/linux/syscalls.h</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">asmlinkage <span class="keyword">int</span> sys_helloworld(<span class="keyword">void</span>);</div></pre></td></tr></table></figure></li>
+<li>到~/Desktop/linux-3.10.60/arch/x86/syscalls/syscall_32.tbl中增加<br><figure class="highlight"><figcaption><span>~/Desktop/linux-3.10.60/arch/x86/syscalls/syscall_32.tbl</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">351     i386    helloworld              sys_helloworld</div></pre></td></tr></table></figure><br><strong>注意Entry不一定是351，要隨下載的Kernel Source Code作調整</strong></li>
+<li>到~/Desktop/linux-3.10.60/arch/x86/kernel/Makefile中增加<br><figure class="highlight"><figcaption><span>~/Desktop/linux-3.10.60/arch/x86/kernel/Makefile</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">obj-y+</span>=<span class="string"> helloworld.o</span></div></pre></td></tr></table></figure><br>這樣新增System Call就告一段落，再來是編譯Kernel</li>
+<li>安裝編譯會用到的套件<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo apt-<span class="keyword">get</span> install fakeroot build-essential kernel-<span class="package"><span class="keyword">package</span> <span class="title">libncurses5</span> <span class="title">libncurses5</span>-<span class="title">dev</span></span></div></pre></td></tr></table></figure></li>
+<li>把現在系統的config複製出來到改過的Kernel中<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">cd</span> ~/Desktop/linux-<span class="number">3.10</span>.<span class="number">60</span></div><div class="line"><span class="keyword">cp</span> /boot/config-linux-<span class="number">3.10</span>.<span class="number">60</span> ./.config</div><div class="line"><span class="keyword">make</span> menuconifg</div></pre></td></tr></table></figure></li>
+<li>到menuconifg畫面時，選擇Save改名為.config就好，之後按Exit離開</li>
+<li>Compile Kernel<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">make</span>-kpkg clean</div><div class="line">fakeroot <span class="keyword">make</span>-kpkg --initrd kernel_image kernel_headers</div></pre></td></tr></table></figure><br><strong>Compile Kernel會花相當多時間，要有耐心等待，在fakeroot make-kpkg —initrd kernel_image kernel_headers後方加入 -j [邏輯核心數]，用多核心去跑會比較快</strong></li>
+<li>經過漫長的等待，會輸出兩個檔案linux-image-3.10.60.Custom_i386.deb和linux-headers-3.10.60.Custom_i386.deb，安裝他們<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">sudo</span> dpkg -i linux-image-<span class="number">3.10</span>.<span class="number">60</span>.Custom_i386.deb</div><div class="line"><span class="built_in">sudo</span> dpkg -i linux-headers-<span class="number">3.10</span>.<span class="number">60</span>.Custom_i386.deb</div></pre></td></tr></table></figure></li>
+<li>接下來重開機</li>
+<li>輸入uname -r 可以檢查是否更新Kernel<br><strong>安裝完kernel一定要重開機，否則不會更新版本</strong></li>
+<li>寫一個call System Call的小程式<figure class="highlight"><figcaption><span>test.c</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;syscall.h&gt;</span></div><div class="line"><span class="preprocessor">#<span class="keyword">include</span> &lt;sys/types.h&gt;</span></div><div class="line"></div><div class="line"><span class="keyword">int</span> main(<span class="keyword">void</span>) </div><div class="line">{</div><div class="line">	<span class="keyword">int</span> a=syscall(<span class="number">351</span>);</div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">}</div></pre></td></tr></table></figure></li>
+<li>測試和編譯<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">gcc -o <span class="keyword">test</span> <span class="keyword">test</span>.c</div><div class="line">./<span class="keyword">test</span></div></pre></td></tr></table></figure><br><strong>在terminal上不會跑出結果出來，要輸入dmesg，結果才會跑出來</strong></li>
+</ol>
+]]></content>
+    
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+      <category term="[Linux-Kernel]" scheme="http://blake31113.github.io/tags/-Linux-Kernel/"/>
+    
+      <category term="[Ubuntu]" scheme="http://blake31113.github.io/tags/-Ubuntu/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[Cocos2d-x][設置開發環境 Cocos2d-x in Visual Studio 2012 for Windows]]]></title>
+    <link href="http://blake31113.github.io/2014/11/01/%5BCocos2d-x%5D%5B%E8%A8%AD%E7%BD%AE%E9%96%8B%E7%99%BC%E7%92%B0%E5%A2%83%20Cocos2d-x%20in%20Visual%20Studio%202012%20for%20Windows%5D/"/>
+    <id>http://blake31113.github.io/2014/11/01/[Cocos2d-x][設置開發環境 Cocos2d-x in Visual Studio 2012 for Windows]/</id>
+    <published>2014-10-31T18:14:00.000Z</published>
+    <updated>2014-11-01T03:54:29.000Z</updated>
+    <content type="html"><![CDATA[<h3 id="Cocos2d-x，以Visual_Studio_2012為開發環境">Cocos2d-x，以Visual Studio 2012為開發環境</h3>
+<ol>
+<li>打開Project內win32的資料夾</li>
+<li>打開以Project名稱命名的.sln檔(Visual Studio Soulution)，Visual Studio會開始剖析、連結相關檔案，需要等一會</li>
+<li>對專案右鍵-&gt;建置專案，會開始連結library和Compile檔案，會耗時10分鐘左右，但之後因為沒有改動太多，Compile會很快<br><strong>如果看到”warning C4819: 檔案含有無法在目前字碼頁 (950) 中表示的字元。請以 Unicode 格式儲存檔案以防止資料遺失”，或是其他warning就無視吧，這是因為本身Visual Studio的問題，似乎對目前Project沒有影響</strong></li>
+<li>如果沒有Error，按上方工具列上的”本機Windows偵錯工具”，等連結完相關的dll後，預設的helloworld遊戲畫面就會出來了</li>
+</ol>
+<div class="separator" style="clear: both; text-align: center;">[<img src="https://lh6.googleusercontent.com/-OzWCPq9NSdQ/VFRXX3zjdFI/AAAAAAAAGOE/LPiu7ruMYGg/w999-h533-no/uiopuipo.PNG" alt=""></div>]]></content>
+    
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+      <category term="[Cocos2d-x]" scheme="http://blake31113.github.io/tags/-Cocos2d-x/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[Cocos2d-x][初戰 建置環境 for Android on Windows]]]></title>
+    <link href="http://blake31113.github.io/2014/10/31/%5BCocos2d-x%5D%5B%E5%88%9D%E6%88%B0%20%E5%BB%BA%E7%BD%AE%E7%92%B0%E5%A2%83%20for%20Windows%5D/"/>
+    <id>http://blake31113.github.io/2014/10/31/[Cocos2d-x][初戰 建置環境 for Windows]/</id>
+    <published>2014-10-31T03:24:00.000Z</published>
+    <updated>2014-11-02T15:39:36.000Z</updated>
+    <content type="html"><![CDATA[<h3 id="Cocos2d-x_建置環境_for_Android_on_Windows">Cocos2d-x 建置環境 for Android on Windows</h3>
+<p>我的環境是Windows 7 64bits CPU i5 M480</p>
+<h3 id="需先下載">需先下載</h3>
+<ol>
+<li>apache ant                                <a href="http://ftp.tc.edu.tw/pub/Apache//ant/binaries/apache-ant-1.9.4-bin.zip" target="_blank" rel="external">Download</a></li>
+<li>Android Development Tools                <a href="https://developer.android.com/sdk/index.html" target="_blank" rel="external">Download</a></li>
+<li>Android ndk                                <a href="http://dl.google.com/android/ndk/android-ndk-r9d-windows-x86_64.zip" target="_blank" rel="external">Download</a></li>
+<li>Cocos2d-x                                <a href="http://www.cocos2d-x.org/filedown/cocos2d-x-3.3rc0.zip" target="_blank" rel="external">Download</a></li>
+<li>python 2.7 version <strong>not 3.6 version</strong>    <a href="https://www.python.org/ftp/python/2.7.8/python-2.7.8.msi" target="_blank" rel="external">Download</a></li>
+</ol>
+<h3 id="安裝_python_2-7">安裝 python 2.7</h3>
+<p>安裝python2.7後-&gt;按下下方工具列的<strong>開始</strong>-&gt;對電腦按右鍵-&gt;內容-&gt;進階系統設定-&gt;環境變數-&gt;系統變數中的PATH-&gt;編輯-&gt;在變數值中<strong>加入</strong>你所安裝python2.7的位置-&gt;最後加上，和其他數值分開<strong>※我的python位置放在C:\Python27，所以在變數值中加入C:\Python27;</strong></p>
+<h3 id="Setup_Cocos2d-x">Setup Cocos2d-x</h3>
+<p>把下載的另外三個檔案放入你指定的資料夾中<strong>※我是放在”D:\cocos2d”中</strong>，並解壓縮<br>使用Command Prompt並前往該資料夾，打入setup.py</p>
+<figure class="highlight"><figcaption><span>in_Windows_Prompt</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">D:</div><div class="line"><span class="built_in">cd</span> cocos2d</div><div class="line">setup.py</div></pre></td></tr></table></figure>
+
+<p>他會要求輸入其他三個的根目錄，依序是</p>
+<ol>
+<li>NDK_ROOT            <strong>※我的目錄為D:\Cocos2d\android-ndk-r9d</strong></li>
+<li>Android_SDK_ROOT     <strong>※我的目錄為D:\Cocos2d\adt-bundle-windows-x86_64-20140702\sdk</strong></li>
+<li>ANT_ROOT            <strong>※我的目錄為D:\Cocos2d\apache-ant-1.9.4\bin 記得是ant資料夾裡面bin的路徑</strong></li>
+</ol>
+<p>基本上Cocos2d-x這樣就設置完成了</p>
+<h3 id="創建新的Project">創建新的Project</h3>
+<p>在Cocos2d裡面鍵入</p>
+<figure class="highlight"><figcaption><span>D:\\Cocos2d\\cocos2d-x-3.3rc0</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cocos.py new  testproject -p org.blake31113.testproject <span class="operator">-l</span> cpp <span class="operator">-d</span> D:\Cocos2d\Project</div></pre></td></tr></table></figure><br>在D:\Cocos2d\Project內建立testproject這個Project，<br>package name為org.blake31113.testproject，<br>language name 為 C++<br>destination 為 D:\Cocos2d\Project<br><br><strong>參照</strong><br><figure class="highlight"><figcaption><span>D:\\Cocos2d\\cocos2d-x-3.3rc0</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cocos.py new <span class="tag">&lt;<span class="title">project_name</span>&gt;</span> -p <span class="tag">&lt;<span class="title">package_name</span>&gt;</span> -l <span class="tag">&lt;<span class="title">language_name</span>&gt;</span> -d <span class="tag">&lt;<span class="title">destination</span>&gt;</span></div></pre></td></tr></table></figure>
+
+<h3 id="Build_Project">Build Project</h3>
+<p>進入Project中的proj.android並鍵入</p>
+<figure class="highlight"><figcaption><span>D:\\Cocos2d\\Project\\testproject\\proj.android</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">build_native.<span class="keyword">py</span></div></pre></td></tr></table></figure>
+
+<p>編譯可能會有段時間，<br>編譯完後，Project就建立並編譯&amp;建置完了</p>
+<h3 id="將Project輸出apk並執行">將Project輸出apk並執行</h3>
+<ol>
+<li>打開剛剛下載的Android Development Tools(ADT)中的eclipse(in D:\Cocos2d\adt-bundle-windows-x86_64-20140702\eclipse)</li>
+<li>按File-&gt;import-&gt;Android-&gt;Existing Android Code Into Workspace</li>
+<li>按Browse-&gt;選擇Project資料夾(D:\Cocos2d\Project\testproject)-&gt;先按Deselect All-&gt;選擇cocos2d\cocos\platform\android\java和proj.android-&gt;Finish<br>(<strong>cocos2d\cocos\platform\android\java是cocos2d的library，之後輸出其他Project可以不用再import</strong>)</li>
+<li>此時Project的圖示會有紅色驚嘆號，代表還有問題，eclipse會呼叫專案的build_native.py，再Compile Project一次</li>
+<li>成功Compile完後，libcocos2dx和project的紅色驚嘆號和叉叉都會消失</li>
+<li>檢查一下project內android的版本，如果是4.4W的話要換成4.4.2(API19)，否則會無法輸出(4.4W是給Android Wear的API)<br>(要換成4.4.2版:在Eclipse工具列上Windows-&gt;SDK Manager，選擇4.4.2 install，install完後，對Project按右鍵-&gt;Properties-&gt;Android-&gt;選擇4.4.2-&gt;Apply-&gt;OK)</li>
+<li>檢查一下project內是否有Android Dependencies，有的話也會無法成功輸出，需要對Project按右鍵-&gt;Build_Path-&gt;Configure-&gt;Libraries-&gt;點選Android Dependencies-&gt;Remove-&gt;OK<br>(Ecilpse在Android4.0之後，如果Project是Android的Application，會自動加入Android Dependency)</li>
+<li>將手機或平板插上，並將USB偵錯開啟</li>
+<li>對Project按右鍵-&gt;Run as Android Application，選擇該裝置就OK了</li>
+</ol>
+<div class="separator" style="clear: both; text-align: center;">[<img src="https://lh5.googleusercontent.com/-XrTI4Dxj7XE/VFRYgMTZEeI/AAAAAAAAGOQ/SXLm4YHEBBE/w948-h533-no/Screenshot_2014-11-01-09-13-47.png" alt=""></div>
+
+
+<p><strong>使用Genymotion做模擬，卻不能work，貌似因為Compile是透過armabi(ARM Application Binary Interface)而不是x86的，所以無法work</strong><br><strong>無法使用Genymotion的<a href="http://discuss.cocos2d-x.org/t/cocos2d-x-with-genymotion/9476/2" target="_blank" rel="external">詳細原因與解法</a></strong></p>
+]]></content>
+    
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+      <category term="[Cocos2d-x]" scheme="http://blake31113.github.io/tags/-Cocos2d-x/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[分享][Hexo][Hexo其它設定]]]></title>
+    <link href="http://blake31113.github.io/2014/07/12/%5B%E5%88%86%E4%BA%AB%5D%5BHexo%5D%5BHexo%E5%85%B6%E5%AE%83%E8%A8%AD%E5%AE%9A%5D/"/>
+    <id>http://blake31113.github.io/2014/07/12/[分享][Hexo][Hexo其它設定]/</id>
+    <published>2014-07-12T08:50:00.000Z</published>
+    <updated>2014-07-12T10:44:35.000Z</updated>
+    <content type="html"><![CDATA[<h3 id="hexo內_設置_RSS,_Sitemap,_Disqus">hexo內 設置 RSS, Sitemap, Disqus</h3>
+<h3 id="設置_RSS">設置 RSS</h3>
+<ol>
+<li>安裝RSS插件，到blog目錄下，輸入<figure class="highlight"><figcaption><span>blog/</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm <span class="operator"><span class="keyword">install</span> hexo-generator-feed</span></div></pre></td></tr></table></figure></li>
+<li>到blog目錄下找到<code>_config.yml</code>，在<code># Plugins</code>部分加上<figure class="highlight"><figcaption><span>blog/_config.yml</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">plugin<span class="variable">s:</span></div><div class="line">  - hexo-generator-feed</div></pre></td></tr></table></figure></li>
+<li>到下方，<code># RSS hexo-generator-feed</code>部分改成<figure class="highlight"><figcaption><span>blog/_config.yml</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor"># RSS hexo-generator-feed</span></div><div class="line"><span class="title">feed</span>:</div><div class="line">  <span class="typedef"><span class="keyword">type</span>: atom</span></div><div class="line">  path: atom.xml</div><div class="line">  limit: <span class="number">20</span></div></pre></td></tr></table></figure></li>
+<li>到theme資料夾，你的主題底下找<code>_config.yml</code>檔案，到裡面<code>rss</code>的地方，改成<figure class="highlight"><figcaption><span>blog/theme/themename/_config.yml</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attribute">rss</span>: <span class="string">/atom.xml</span></div></pre></td></tr></table></figure></li>
+<li>輸入<code>hexo generate</code> 讓RSS產生出來，會產生在<code>public</code>資料夾裡面</li>
+</ol>
+<h3 id="設置_Sitemap">設置 Sitemap</h3>
+<ol>
+<li>安裝Sitemap插件，到blog目錄下，輸入<figure class="highlight"><figcaption><span>blog/</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm <span class="operator"><span class="keyword">install</span> hexo-generator-sitemap</span></div></pre></td></tr></table></figure></li>
+<li>到blog目錄下找到<code>_config.yml</code>，在<code># Plugins</code>部分加上<figure class="highlight"><figcaption><span>blog/_config.yml</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">plugin<span class="variable">s:</span></div><div class="line">  - hexo-generator-sitemap</div></pre></td></tr></table></figure></li>
+<li>輸入<code>hexo generate</code> 讓RSS產生出來，會產生在<code>blog/public</code>資料夾裡面</li>
+</ol>
+<p>Sitemap是為了讓搜尋引擎可以搜到你的blog，最好自己向Google或是百度加入blog的sitemap.xml</p>
+<p><strong>sitemap.xml裡面不可以有”&amp;”號(因為年少的錯誤，常常在文章主旨放入”&amp;”，導致sitemap.xml會無法parse，把&amp;全部修掉後才正常能正常運作)</strong></p>
+<h3 id="設置_Disqus">設置 Disqus</h3>
+<p>Disqus是一套<strong>整合性留言管理系統</strong>，<br>因為Hexo只是靜態頁面，沒有資料庫在背後支持留言系統，只好靠第三方的留言管理系統</p>
+<ol>
+<li>到<a href="https://disqus.com/" target="_blank" rel="external">Disqus官網</a>註冊帳號</li>
+<li>到blog目錄下找到_config.yml，在<code># Disqus</code>的部分加上自己的shortname<figure class="highlight"><figcaption><span>blog/_config.yml</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor"># Disqus</span></div><div class="line">disqus_shortname: blake31113</div></pre></td></tr></table></figure></li>
+<li>到<code>themes/themename/layout/_partial</code>修改<code>comment.ejs</code>成<figure class="highlight"><figcaption><span>blog/themes/themename/layout/_partial/comment.ejs</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="vbscript">&lt;% <span class="keyword">if</span> (page.comments){ %&gt;</span></div><div class="line"><span class="tag">&lt;<span class="title">section</span> <span class="attribute">id</span>=<span class="value">"comment"</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="title">h1</span> <span class="attribute">class</span>=<span class="value">"title"</span>&gt;</span><span class="vbscript">&lt;%= __(<span class="comment">'comment') %&gt;</span></span><span class="tag">&lt;/<span class="title">h1</span>&gt;</span></div><div class="line"></div><div class="line">	<span class="vbscript">&lt;% <span class="keyword">if</span> (theme.comment_provider == <span class="string">"facebook"</span>) {</span></div><div class="line">		<span class="keyword">if</span> (theme.facebook) { %&gt;</div><div class="line">		<span class="vbscript">&lt;%- partial(<span class="comment">'_partial/facebook_comment', {fbConfig: theme.facebook}) %&gt;</span></span></div><div class="line">		<span class="vbscript">&lt;% } %&gt;</span></div><div class="line">	<span class="vbscript">&lt;% } <span class="keyword">else</span> <span class="keyword">if</span>(config.disqus_shortname) { %&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="title">div</span> <span class="attribute">id</span>=<span class="value">"disqus_thread"</span>&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="title">noscript</span>&gt;</span>Please enable JavaScript to view the <span class="tag">&lt;<span class="title">a</span> <span class="attribute">href</span>=<span class="value">"//disqus.com/?ref_noscript"</span>&gt;</span>comments powered by Disqus.<span class="tag">&lt;/<span class="title">a</span>&gt;</span><span class="tag">&lt;/<span class="title">noscript</span>&gt;</span></div><div class="line">	<span class="tag">&lt;/<span class="title">div</span>&gt;</span></div><div class="line">	<span class="vbscript">&lt;% } %&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="title">section</span>&gt;</span></div><div class="line"><span class="vbscript">&lt;% } %&gt;</span></div></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="使用git上傳發生錯誤:「warning:_LF_will_be_replaced_by_CRLF」">使用git上傳發生錯誤:「warning: LF will be replaced by CRLF」</h3>
+<p>因為 Windows 環境下，換行會變成 CRLF ， Linux 和現在的 Mac OS 換行則是 LF<br>雖然不會影響執行結果，不過如果覺得礙眼<br>可以到<code>blog/.deply/.git</code>(可能為隱藏)，找<code>cofig</code>檔，在<code>[core]</code>裡面加入<code>autocrlf = false</code>，如下</p>
+<p><figure class="highlight"><figcaption><span>blog/.deply/.git/cofig</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">[core]</div><div class="line">	<span class="variable">repositoryformatversion =</span> <span class="number">0</span></div><div class="line">	<span class="variable">filemode =</span> <span class="constant">false</span></div><div class="line">	<span class="variable">bare =</span> <span class="constant">false</span></div><div class="line">	<span class="variable">logallrefupdates =</span> <span class="constant">true</span></div><div class="line">	<span class="variable">symlinks =</span> <span class="constant">false</span></div><div class="line">	<span class="variable">ignorecase =</span> <span class="constant">true</span></div><div class="line">	<span class="variable">hideDotFiles =</span> dotGitOnly</div><div class="line">	<span class="variable">autocrlf =</span> <span class="constant">false</span></div></pre></td></tr></table></figure><br>就會自己忽略<strong>CRLF</strong>了</p>
+]]></content>
+    
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+      <category term="[Hexo]" scheme="http://blake31113.github.io/tags/-Hexo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[分享][Hexo][Blogger migrate to Hexo]]]></title>
+    <link href="http://blake31113.github.io/2014/07/11/%5B%E5%88%86%E4%BA%AB%5D%5BHexo%5D%5BBlogger%20migrate%20to%20Hexo%5D/"/>
+    <id>http://blake31113.github.io/2014/07/11/[分享][Hexo][Blogger migrate to Hexo]/</id>
+    <published>2014-07-11T08:50:00.000Z</published>
+    <updated>2014-07-11T08:50:15.000Z</updated>
+    <content type="html"><![CDATA[<h3 id="Blogger_移植到_Hexo">Blogger 移植到 Hexo</h3>
+<ol>
+<li>安裝hexo rss migrator插件，到Hexo的Blog資料夾中輸入<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm <span class="operator"><span class="keyword">install</span> hexo-migrator-rss <span class="comment">--save</span></span></div></pre></td></tr></table></figure><br>因為Blogger的Rss有25筆文章的限制<br>所以<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hexo migrate rss <span class="symbol">http:</span>/<span class="regexp">/blogname.blogspot.com/feeds</span><span class="regexp">/posts/default</span>?alt=rss</div></pre></td></tr></table></figure><br>會只有25篇<br>而在Blogger Rss後面加max-results=200的合法參數，hexo會變的無法解析<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hexo migrate rss <span class="symbol">http:</span>/<span class="regexp">/blogname.blogspot.com/feeds</span><span class="regexp">/posts/default</span>?alt=rss&amp;max-results=<span class="number">200</span></div></pre></td></tr></table></figure><br>所以這時只能把RSS載下來處理</li>
+<li>到你的RSS網址(max-results 隨你的文章數調整)<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">http:</span>/<span class="regexp">/blogname.blogspot.com/feeds</span><span class="regexp">/posts/default</span>?alt=rss&amp;max-results=<span class="number">200</span></div></pre></td></tr></table></figure></li>
+<li>按右鍵，另存新檔到Hexo的Blog資料夾</li>
+<li>到Hexo的Blog資料夾中輸入<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="title">hexo</span> migrate rss rssfilename.xml</div></pre></td></tr></table></figure><br>就大功告成囉</li>
+</ol>
+]]></content>
+    
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+      <category term="[Hexo]" scheme="http://blake31113.github.io/tags/-Hexo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[分享][Hexo][Hexo + GitHub for Windows]]]></title>
+    <link href="http://blake31113.github.io/2014/07/11/%5B%E5%88%86%E4%BA%AB%5D%5BHexo%5D%5BHexo%20+%20GitHub%20for%20Windows%5D/"/>
+    <id>http://blake31113.github.io/2014/07/11/[分享][Hexo][Hexo + GitHub for Windows]/</id>
+    <published>2014-07-11T08:00:00.000Z</published>
+    <updated>2014-07-11T08:24:53.000Z</updated>
+    <content type="html"><![CDATA[<h3 id="Hexo_framework_搭配上_Github版本管理_外加_Github靜態網頁空間">Hexo framework<strong> 搭配上 </strong>Github版本管理<strong> 外加 </strong>Github靜態網頁空間</h3>
+<ol>
+<li>首先先要有Github帳號</li>
+<li>使用Github創建一個Repository，<strong>名為username.github.io<br>(ex: username:blake31113=&gt;Repository name: blake31113.github.io 一定要為這種格式Github才會幫你Generate Page)</strong></li>
+<li>修改在Hexo的Blog資料夾下的_config.yml成<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">deploy:</div><div class="line">  <span class="built_in">type</span>: github</div><div class="line">  repository: git@github.com:username/username.github.<span class="built_in">io</span>.git</div><div class="line">  branch: master</div></pre></td></tr></table></figure></li>
+<li>在Blog資料夾內輸入<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="title">hexo</span> deploy</div></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>就大功告成囉</p>
+<h3 id="如果有SSH的錯誤發生">如果有SSH的錯誤發生</h3>
+<ol>
+<li>安裝Git，我是去<a href="http://msysgit.github.io/" target="_blank" rel="external">這裡</a>下載的，因為要使用Git Bash</li>
+<li>打開Git Bash，檢查電腦上的ssh key，輸入<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ <span class="built_in">cd</span> ~/.ssh</div></pre></td></tr></table></figure></li>
+<li>生成新的SSH key<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$ </span>ssh-keygen -t rsa -<span class="constant">C</span> <span class="string">"github email address"</span></div></pre></td></tr></table></figure></li>
+<li>會出現以下內容，可以直接按Enter，使用預設值<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Generating <span class="keyword">public</span>/<span class="keyword">private</span> rsa <span class="keyword">key</span> pair.</div><div class="line">Enter file <span class="keyword">in</span> which <span class="keyword">to</span> save the <span class="keyword">key</span> (/Users/your_user_directory/.ssh/id_rsa):</div></pre></td></tr></table></figure><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">Enter</span> passphrase (empty for no passphrase):</div><div class="line"><span class="keyword">Enter</span> same passphrase again:</div></pre></td></tr></table></figure></li>
+<li>看到以下內容就代表成功了<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Your identification has been saved <span class="keyword">in</span> /c/Users/you/<span class="string">.ssh</span>/id_rsa.</div><div class="line">The key fingerprint is:</div><div class="line"><span class="number">01</span>:0f:f4:3b:ca:<span class="number">85</span>:d6:<span class="number">17</span>:a1:<span class="number">7d</span>:f0:<span class="number">68</span>:<span class="number">9d</span>:f0:a2:<span class="pseudo">db</span> email_address</div></pre></td></tr></table></figure></li>
+<li>將剛剛生成位置的id_rsa.pub複製內文後，新增到GitHub-&gt;Account Setting-&gt;SSH Keys上面去</li>
+<li>使用Git Bash輸入以下指令，測驗是否成功<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="title">ssh</span> -T git<span class="variable">@github</span>.com</div></pre></td></tr></table></figure></li>
+<li>使用Hexo 來Deploy到Github上，開啟Windows Prompt到blog資料夾，輸入<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="title">hexo</span> deploy</div></pre></td></tr></table></figure></li>
+<li>在瀏覽器網指輸入:<strong>username.github.io</strong>，如果有內容代表成功囉</li>
+</ol>
+]]></content>
+    
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+      <category term="[Hexo]" scheme="http://blake31113.github.io/tags/-Hexo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[分享][Hexo][第一次使用Hexo就上手 for Windows]]]></title>
+    <link href="http://blake31113.github.io/2014/07/11/%5B%E5%88%86%E4%BA%AB%5D%5BHexo%5D%5B%E7%AC%AC%E4%B8%80%E6%AC%A1%E4%BD%BF%E7%94%A8Hexo%E5%B0%B1%E4%B8%8A%E6%89%8B%5D/"/>
+    <id>http://blake31113.github.io/2014/07/11/[分享][Hexo][第一次使用Hexo就上手]/</id>
+    <published>2014-07-11T04:56:00.000Z</published>
+    <updated>2014-07-11T07:35:55.000Z</updated>
+    <content type="html"><![CDATA[<p>使用Markdown格式寫過Github上的Readme後，再回去用Google Blogger寫blog，發現怎麼會有這麼難寫的設計,尤其在程式碼呈現的部分,就決定把blog換到別的地方去。</p>
+<p>支援Markdown格式的Blog Framework有</p>
+<ul>
+<li>Jekyll</li>
+<li>Octopress</li>
+<li>Hexo</li>
+<li>Logdown</li>
+<li>Farbox</li>
+<li>………</li>
+</ul>
+<p>看了看以上的優缺點，覺得Hexo算是最好上手、安裝最簡潔的，就決定用他了。</p>
+<p>Hexo是用Node.js製成的，比起用Ruby寫的<a href="https://github.com/mojombo/jekyll" target="_blank" rel="external">Jekyll</a>和<a href="http://octopress.org/" target="_blank" rel="external">Octopress</a>在檔案的Generate方面快上許多。</p>
+<h3 id="安裝Node-js">安裝Node.js</h3>
+<p>由於是由Node.js開發的，必須先安裝Node.js，Windows的Node.js安裝非常簡單，只要去<a href="http://nodejs.org/" target="_blank" rel="external">Node.js官網</a>按下Install下載安裝就好了<strong>(注意要將npm add到PATH裡面去，否則無法在Windows Prompt下執行npm)</strong></p>
+<h3 id="安裝Hexo">安裝Hexo</h3>
+<ol>
+<li>在Windows Prompt下執行</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm <span class="operator"><span class="keyword">install</span> hexo -g	</span></div></pre></td></tr></table></figure>
+
+
+<ol>
+<li>在本機端選擇，要安裝Blog資料夾的位置並執行以下指令，會將hexo初始化並安裝於blog這個資料夾中</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hexo <span class="keyword">init</span> blog</div></pre></td></tr></table></figure>
+
+
+<ol>
+<li>移動到blog資料夾中</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> blog</div></pre></td></tr></table></figure>
+
+<ol>
+<li>執行以下指令，會將Node Package Module安裝於該資料夾，Hexo才能跑</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm <span class="operator"><span class="keyword">install</span></span></div></pre></td></tr></table></figure>
+
+<ol>
+<li>Load  <strong>blog/source/_posts/</strong> 內的Markdown檔，並產生他們的Blog網頁</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hexo <span class="keyword">generate</span></div></pre></td></tr></table></figure>
+
+<ol>
+<li>開啟Server，用於本機測試用，可以打開<a href="http://localhost:4000/" target="_blank" rel="external">http://localhost:4000/</a>來查看Blog是否正常產生與顯示</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hexo <span class="keyword">server</span></div></pre></td></tr></table></figure>
+
+<h4 id="新增文章">新增文章</h4>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ hexo <span class="keyword">new</span> [layout] &lt;title&gt;</div><div class="line"></div><div class="line">$ hexo <span class="keyword">new</span> <span class="string">"New Post"</span></div><div class="line"># =&gt; The <span class="keyword">file</span> will <span class="keyword">be</span> created at <span class="keyword">source</span>/_posts/<span class="keyword">new</span>-post.md</div><div class="line">$ hexo <span class="keyword">new</span> page <span class="string">"New Page"</span></div><div class="line"># =&gt; The <span class="keyword">file</span> will <span class="keyword">be</span> created at <span class="keyword">source</span>/<span class="keyword">new</span>-page/<span class="built_in">index</span>.html</div><div class="line">$ hexo <span class="keyword">new</span> draft <span class="string">"New Draft"</span></div><div class="line"># =&gt; The <span class="keyword">file</span> will <span class="keyword">be</span> created at <span class="keyword">source</span>/_drafts/<span class="keyword">new</span>-draft.md</div></pre></td></tr></table></figure>
+
+
+<p><strong>記得post完新增的.md後 要重新<code>hexo generate</code>才會有該.md的Blog產生</strong></p>
+]]></content>
+    
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+      <category term="[Hexo]" scheme="http://blake31113.github.io/tags/-Hexo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[分享][Raspberry Pi 樹莓派][Ras PI + Webcam + MJPG-streamer 即時監控影象]]]></title>
+    <link href="http://blake31113.github.io/2014/07/10/%5B%E5%88%86%E4%BA%AB%5D%5BRaspberry-Pi-%E6%A8%B9%E8%8E%93%E6%B4%BE%5D%5BRas-PI-+-Webcam-+-MJPG-streamer-%E5%8D%B3%E6%99%82%E7%9B%A3%E6%8E%A7%E5%BD%B1%E8%B1%A1%5D/"/>
+    <id>http://blake31113.github.io/2014/07/10/[分享][Raspberry-Pi-樹莓派][Ras-PI-+-Webcam-+-MJPG-streamer-即時監控影象]/</id>
+    <published>2014-07-10T09:17:00.000Z</published>
+    <updated>2014-11-01T03:54:59.000Z</updated>
+    <content type="html"><![CDATA[<div class="separator" style="clear: both; text-align: center;"></div><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-LwaMiZJTQs0/U75eWmEi_DI/AAAAAAAAD3c/XvnkmR6uwZM/s1600/10361524_824462794239414_1504118639631193976_n.jpg" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-LwaMiZJTQs0/U75eWmEi_DI/AAAAAAAAD3c/XvnkmR6uwZM/s1600/10361524_824462794239414_1504118639631193976_n.jpg" alt=""></a></div><br><script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>需求<br>-Raspberry Pi<em>1 &nbsp; (使用OS: 2013-05-25-wheezy-raspbian)<br>-Webcam</em>1<br>(另外旁邊的HDMI to VGA 和 USB hub)<br><a id="more"></a><br>1.將Raspberry Pi插上網路線或是接上Wifi模組<br>2..Raspberry Pi 插電開啟<br>3.在Command Line下執行<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$ </span>lsusb</div></pre></td></tr></table></figure><br><br>有看到你連接的Camera就代表成功連接了<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="tag">Bus</span> 001 <span class="tag">Device</span> 002: <span class="tag">ID</span> 0424<span class="pseudo">:9512</span> <span class="tag">Standard</span> <span class="tag">Microsystems</span> <span class="tag">Corp</span>.</div><div class="line"><span class="tag">Bus</span> 001 <span class="tag">Device</span> 001: <span class="tag">ID</span> 1<span class="tag">d6b</span><span class="pseudo">:0002</span> <span class="tag">Linux</span> <span class="tag">Foundation</span> 2<span class="class">.0</span> <span class="tag">root</span> <span class="tag">hub</span></div><div class="line"><span class="tag">Bus</span> 001 <span class="tag">Device</span> 003: <span class="tag">ID</span> 0424<span class="pseudo">:ec00</span> <span class="tag">Standard</span> <span class="tag">Microsystems</span> <span class="tag">Corp</span>.</div><div class="line"><span class="tag">Bus</span> 001 <span class="tag">Device</span> 004: <span class="tag">ID</span> 2001<span class="pseudo">:3308</span> <span class="tag">D-Link</span> <span class="tag">Corp</span>. <span class="tag">DWA-121</span> 802<span class="class">.11n</span> <span class="tag">Wireless</span> <span class="tag">N</span> 150 <span class="tag">Pico</span> <span class="tag">Adapter</span> <span class="attr_selector">[Realtek RTL8188CUS]</span></div><div class="line"><span class="tag">Bus</span> 001 <span class="tag">Device</span> 006: <span class="tag">ID</span> 1<span class="tag">a40</span><span class="pseudo">:0101</span> <span class="tag">Terminus</span> <span class="tag">Technology</span> <span class="tag">Inc</span>. 4<span class="tag">-Port</span> <span class="tag">HUB</span></div><div class="line"><span class="tag">Bus</span> 001 <span class="tag">Device</span> 007: <span class="tag">ID</span> 046<span class="tag">d</span><span class="pseudo">:c52e</span> <span class="tag">Logitech</span>, <span class="tag">Inc</span>.</div><div class="line"><span class="tag">Bus</span> 001 <span class="tag">Device</span> 030: <span class="tag">ID</span> 1871<span class="pseudo">:0d01</span> <span class="tag">Aveo</span> <span class="tag">Technology</span> <span class="tag">Corp</span>. <span class="tag">USB2</span><span class="class">.0</span> <span class="tag">Camera</span></div></pre></td></tr></table></figure><br><br>4.安裝 mjpg-streamer<br>mjpg-streamer是用來將視訊網路串流化，透過mjpg裡面的解碼器，可以讓影像擷取速率以及畫質有良好的表現<br><br>從 SourceForge 上用 svn 直接把mjpg-streamer抓下來<br><br>安裝SVN<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$sudo</span> apt-get install subversion</div></pre></td></tr></table></figure><br><br>把最新版的mjpg-streamer用SVN抓下來<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">svn <span class="keyword">co</span> http<span class="variable">s:</span>//svn.code.<span class="keyword">sf</span>.net/<span class="keyword">p</span>/mjpg-streamer/code/mjpg-streamer mjpg-streamer</div></pre></td></tr></table></figure><br><br>在make前要另外安裝一些元件<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$sudo apt-get <span class="operator"><span class="keyword">install</span> libjpeg8-dev </span></div><div class="line">$sudo apt-<span class="keyword">get</span> <span class="keyword">install</span> imagemagick</div></pre></td></tr></table></figure><br><br>去mjpg-streamer資料夾make<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> mjpg-streamer</div><div class="line"><span class="built_in">sudo</span> make</div></pre></td></tr></table></figure><br><br>compile可能會花一些時間<br>compile成功沒有error的話<br>在mjpg-streamer資料夾內輸入<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">.<span class="regexp">/mjpg_streamer -i "./i</span>nput_uvc.so<span class="string">" -o "</span>.<span class="regexp">/output_http.so -w ./</span>www<span class="string">"</span></div></pre></td></tr></table></figure><br><br>如果出現<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">MJPG Streamer Version: svn rev: <span class="number">3</span>:<span class="number">172</span></div><div class="line"><span class="subst">&</span>nbsp;i: Using V4L2 device<span class="built_in">.</span>: /dev/video0</div><div class="line"><span class="subst">&</span>nbsp;i: Desired Resolution: <span class="number">640</span> x <span class="number">480</span></div><div class="line"><span class="subst">&</span>nbsp;i: Frames Per Second<span class="built_in">.</span>: <span class="number">5</span></div><div class="line"><span class="subst">&</span>nbsp;i: Format<span class="attribute">...</span><span class="attribute">...</span><span class="attribute">...</span><span class="attribute">...</span>: MJPEG</div><div class="line">Unable <span class="keyword">to</span> <span class="built_in">set</span> format: <span class="number">1196444237</span> res: <span class="number">640</span>x480</div><div class="line"><span class="subst">&</span>nbsp;Init v4L2 failed <span class="subst">!!</span> exit fatal</div><div class="line"><span class="subst">&</span>nbsp;i: init_VideoIn failed</div></pre></td></tr></table></figure><br><br>代表你的WebCam不支援mjpg<br><br>可以使用在 -i的參數裡面加入 -y 使用YUV編碼<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">.<span class="regexp">/mjpg_streamer -i "./i</span>nput_uvc.so -y<span class="string">" -o "</span>.<span class="regexp">/output_http.so -w ./</span>www<span class="string">"</span></div></pre></td></tr></table></figure><br><br>如果跑出以下情形<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">MJPG Streamer Version: svn rev: <span class="number">3</span>:<span class="number">172</span></div><div class="line">&nbsp;i: Using V4L2 device.: <span class="regexp">/dev/</span>video0</div><div class="line">&nbsp;i: Desired Resolution: <span class="number">640</span> x <span class="number">480</span></div><div class="line">&nbsp;i: Frames Per Second.: <span class="number">5</span></div><div class="line">&nbsp;i: Format............: YUV</div><div class="line">&nbsp;i: JPEG Quality......: <span class="number">80</span></div><div class="line">Adding control <span class="keyword">for</span> Pan (relative)</div><div class="line">UVCIOC_CTRL_ADD - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">Adding control <span class="keyword">for</span> Tilt (relative)</div><div class="line">UVCIOC_CTRL_ADD - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">Adding control <span class="keyword">for</span> Pan Reset</div><div class="line">UVCIOC_CTRL_ADD - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">Adding control <span class="keyword">for</span> Tilt Reset</div><div class="line">UVCIOC_CTRL_ADD - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">Adding control <span class="keyword">for</span> Pan/tilt Reset</div><div class="line">UVCIOC_CTRL_ADD - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">Adding control <span class="keyword">for</span> Focus (absolute)</div><div class="line">UVCIOC_CTRL_ADD - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">mapping control <span class="keyword">for</span> Pan (relative)</div><div class="line">UVCIOC_CTRL_MAP - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">mapping control <span class="keyword">for</span> Tilt (relative)</div><div class="line">UVCIOC_CTRL_MAP - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">mapping control <span class="keyword">for</span> Pan Reset</div><div class="line">UVCIOC_CTRL_MAP - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">mapping control <span class="keyword">for</span> Tilt Reset</div><div class="line">UVCIOC_CTRL_MAP - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">mapping control <span class="keyword">for</span> Pan/tilt Reset</div><div class="line">UVCIOC_CTRL_MAP - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">mapping control <span class="keyword">for</span> Focus (absolute)</div><div class="line">UVCIOC_CTRL_MAP - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">mapping control <span class="keyword">for</span> LED1 Mode</div><div class="line">UVCIOC_CTRL_MAP - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">mapping control <span class="keyword">for</span> LED1 Frequency</div><div class="line">UVCIOC_CTRL_MAP - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">mapping control <span class="keyword">for</span> Disable video processing</div><div class="line">UVCIOC_CTRL_MAP - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">mapping control <span class="keyword">for</span> Raw bits per pixel</div><div class="line">UVCIOC_CTRL_MAP - <span class="built_in">Error</span>: Inappropriate ioctl <span class="keyword">for</span> device</div><div class="line">&nbsp;o: www-folder-path...: ./www/</div><div class="line">&nbsp;o: HTTP TCP port.....: <span class="number">8080</span></div><div class="line">&nbsp;o: username:password.: disabled</div><div class="line">&nbsp;o: commands..........: enabled</div></pre></td></tr></table></figure><br><br>在-y後面加入 -n &nbsp;來消除Error<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">.<span class="regexp">/mjpg_streamer -i "./i</span>nput_uvc.so -y -n<span class="string">" -o "</span>.<span class="regexp">/output_http.so -w ./</span>www<span class="string">"</span></div></pre></td></tr></table></figure><br><br>跑出以下就成功囉<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">MJPG Streamer Version: svn rev: <span class="number">3</span>:<span class="number">172</span></div><div class="line"><span class="subst">&</span>nbsp;i: Using V4L2 device<span class="built_in">.</span>: /dev/video0</div><div class="line"><span class="subst">&</span>nbsp;i: Desired Resolution: <span class="number">640</span> x <span class="number">480</span></div><div class="line"><span class="subst">&</span>nbsp;i: Frames Per Second<span class="built_in">.</span>: <span class="number">5</span></div><div class="line"><span class="subst">&</span>nbsp;i: Format<span class="attribute">...</span><span class="attribute">...</span><span class="attribute">...</span><span class="attribute">...</span>: YUV</div><div class="line"><span class="subst">&</span>nbsp;i: JPEG Quality<span class="attribute">...</span><span class="attribute">...</span>: <span class="number">80</span></div><div class="line"><span class="subst">&</span>nbsp;o: www<span class="attribute">-folder</span><span class="attribute">-path</span><span class="attribute">...</span>: <span class="built_in">.</span>/www<span class="subst">/</span></div><div class="line"><span class="subst">&</span>nbsp;o: HTTP TCP port<span class="attribute">...</span><span class="built_in">..</span>: <span class="number">8080</span></div><div class="line"><span class="subst">&</span>nbsp;o: username:password<span class="built_in">.</span>: disabled</div><div class="line"><span class="subst">&</span>nbsp;o: commands<span class="attribute">...</span><span class="attribute">...</span><span class="attribute">...</span><span class="built_in">.</span>: enabled</div></pre></td></tr></table></figure><br><br>打開瀏覽器到Ras PI所在的IP+Port8080 點選Stream就可以看到影片網路串流囉<br><br><div class="separator" style="clear: both; text-align: center;">[<img src="https://lh5.googleusercontent.com/-XrTI4Dxj7XE/VFRYgMTZEeI/AAAAAAAAGOQ/SXLm4YHEBBE/w948-h533-no/Screenshot_2014-11-01-09-13-47.png" alt=""></div><br><div class="separator" style="clear: both; text-align: center;"></div>]]></content>
+    <summary type="html"><![CDATA[<div class="separator" style="clear: both; text-align: center;"></div><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-LwaMiZJTQs0/U75eWmEi_DI/AAAAAAAAD3c/XvnkmR6uwZM/s1600/10361524_824462794239414_1504118639631193976_n.jpg" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-LwaMiZJTQs0/U75eWmEi_DI/AAAAAAAAD3c/XvnkmR6uwZM/s1600/10361524_824462794239414_1504118639631193976_n.jpg" alt=""></a></div><br><script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>需求<br>-Raspberry Pi<em>1 &nbsp; (使用OS: 2013-05-25-wheezy-raspbian)<br>-Webcam</em>1<br>(另外旁邊的HDMI to VGA 和 USB hub)<br>]]></summary>
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[簡單拍攝技巧/名詞]]></title>
+    <link href="http://blake31113.github.io/2013/11/14/%E7%B0%A1%E5%96%AE%E6%8B%8D%E6%94%9D%E6%8A%80%E5%B7%A7%E5%90%8D%E8%A9%9E/"/>
+    <id>http://blake31113.github.io/2013/11/14/簡單拍攝技巧名詞/</id>
+    <published>2013-11-14T11:16:00.000Z</published>
+    <updated>2014-07-12T06:15:38.000Z</updated>
+    <content type="html"><![CDATA[<p>僅供參考<br>&nbsp;1. 別使用Auto了,  高階DC的轉盤上有M、S、A、P，四個模式<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (1)A-Aperture-priority Mode 光圈優先，顧名思義就是光圈最大，使用此模式可以自由 &nbsp; 調整光圈大小，而快門，相機會自動感光，將快門自動設置成適合的快門。</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 這是一般來說最常使用的模式，適合拍靜物，透過調整光圈，可以製造出”景深” “景 &nbsp; 深”-主體清楚，但是背景模糊的照片，可以凸顯主題<br> <a id="more"></a><br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;當然要背景和主體都很清楚，光圈可以調小，但是要注意快門會隨之提升哦&nbsp; </p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(2)S-Shutter-priority Mode 快門優先，使用此模式可以自由調整快門速度，而光圈，相 &nbsp; 機會自動感光，將光圈自動設置成合適的光圈。<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 適合拍動的物體，快門短-捕捉那剎那，快門長-相機會將所拍攝到的殘影連結起來</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(3)M-Manual Mode   手動模式   快門&amp;光圈都使用者自己調整</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;(4)P-Programmed Auto   程式模式 由程式自己調整光圈以及快門，跟Auto不同的地方是， &nbsp;閃光、白平衡、測光、對焦還是由使用者調整</p>
+<p>&nbsp;2. ISO<br>&nbsp; &nbsp; &nbsp;ISO-感光能力，ISO越高 感光越強，但是雜訊會越多 大白天下拍 ISO 100~200 可以保持純淨的照片，在市內或是晚上等較暗的場所，要達到安全快門(照一張不會晃的照片)  ISO就要往上調，在A模式下可大幅降低快門 另外拍食物，或是有水/油 光澤的物品時，ISO調高可以讓食物上的油/光澤完美成現</p>
+<p>3. 曝光補償(EV)<br>&nbsp; &nbsp; 根據使用者拍攝意圖，對相機的測光提供曝光值，可以讓照片明亮，或灰暗</p>
+<p>4. 構圖<br>&nbsp; &nbsp; 盡量別從正面拍，很呆、死板，相機換個角度，畫面會變得很活潑</p>
+<p>5. 閃光<br>&nbsp; &nbsp; 盡量別用機上的閃光，因為機上閃光只有正面一種角度，照在主體上，會感覺相當突兀，</p>
+<p>6. 打光<br>&nbsp; &nbsp; 在家裡可以用檯燈打光，檯燈到主體前最好有白紙還是什麼東西擋住，以免燈光太亮</p>
+<p>7. 多拍<br>&nbsp; &nbsp; &nbsp;記憶卡=無限容量，可刪除，不要吝嗇去重拍，換種光圈、快門、ISO、曝光補償，各種排列組合下，會有幾張特別好的，漸漸的會抓到拍攝的訣竅</p>
+]]></content>
+    <summary type="html"><![CDATA[<p>僅供參考<br>&nbsp;1. 別使用Auto了,  高階DC的轉盤上有M、S、A、P，四個模式<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (1)A-Aperture-priority Mode 光圈優先，顧名思義就是光圈最大，使用此模式可以自由 &nbsp; 調整光圈大小，而快門，相機會自動感光，將快門自動設置成適合的快門。</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 這是一般來說最常使用的模式，適合拍靜物，透過調整光圈，可以製造出”景深” “景 &nbsp; 深”-主體清楚，但是背景模糊的照片，可以凸顯主題<br> ]]></summary>
+    
+      <category term="[攝影]" scheme="http://blake31113.github.io/tags/-%E6%94%9D%E5%BD%B1/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[変態王子と笑わない猫。]]></title>
+    <link href="http://blake31113.github.io/2013/07/08/%E5%A4%89%E6%85%8B%E7%8E%8B%E5%AD%90%E3%81%A8%E7%AC%91%E3%82%8F%E3%81%AA%E3%81%84%E7%8C%AB%E3%80%82/"/>
+    <id>http://blake31113.github.io/2013/07/08/変態王子と笑わない猫。/</id>
+    <published>2013-07-08T12:56:00.000Z</published>
+    <updated>2014-07-12T06:16:20.000Z</updated>
+    <content type="html"><![CDATA[<div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 20px; margin-bottom: 10px;">Men always want to be a woman’s first love - women like to be a man’s last romance.</div><div class="bq_fq_a" style="margin-bottom: 10px; text-align: left;"><span style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif;"><span style="font-size: 14px; line-height: 20px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Oscar Wilde</span></span></div>]]></content>
+    
+    
+      <category term="[雜言]" scheme="http://blake31113.github.io/tags/-%E9%9B%9C%E8%A8%80/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[效應]]></title>
+    <link href="http://blake31113.github.io/2013/02/15/%E6%95%88%E6%87%89/"/>
+    <id>http://blake31113.github.io/2013/02/15/效應/</id>
+    <published>2013-02-15T15:24:00.000Z</published>
+    <updated>2014-07-12T06:16:10.000Z</updated>
+    <content type="html"><![CDATA[<p>吊橋效應</p>
+<p><span style="background-color: white;"><span style="color: #444444; font-family: arial, 'Century Gothic'; font-size: 13px; line-height: 22px;">1974年，加拿大心理學家Dutton和Aron做了有趣的「吊橋效應」實驗：</span></span></p>
+<p><span style="color: #444444; font-family: arial, 'Century Gothic'; font-size: 13px; line-height: 22px;">一個年輕貌美的女性助理假扮成訪員，</span></p>
+<p><span style="color: #444444; font-family: arial, 'Century Gothic'; font-size: 13px; line-height: 22px;">分別在70公尺高的吊橋和矮小石橋上訪問男性，</span></p>
+<p><span style="color: #444444; font-family: arial, 'Century Gothic'; font-size: 13px; line-height: 22px;">並留給他們電話號碼。結果發現，</span></p>
+<p><span style="color: #444444; font-family: arial, 'Century Gothic'; font-size: 13px; line-height: 22px;">在吊橋上的男子有半數回電給女助理，在小橋上的男性回電率只有1成多。</span></p>
+<p><span style="color: #444444; font-family: arial, 'Century Gothic'; font-size: 13px; line-height: 22px;">研究者認為，男性把吊橋帶來的心跳感覺誤認為對女子心動，</span></p>
+<p><span style="color: #444444; font-family: arial, 'Century Gothic'; font-size: 13px; line-height: 22px;">才回電話給女助理。研究推測，在略帶恐懼的環境中，比較容易培養感情。</span></p>
+<p><span style="color: #444444; font-family: arial, 'Century Gothic'; font-size: 13px; line-height: 22px;">也許，下次把男女朋友帶到吊橋上去告白，會有比較高的成功率喔。</span></p>
+]]></content>
+    
+    
+      <category term="[雜言]" scheme="http://blake31113.github.io/tags/-%E9%9B%9C%E8%A8%80/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[日文輸入法切換 ( MS IME )]]></title>
+    <link href="http://blake31113.github.io/2013/02/15/%E6%97%A5%E6%96%87%E8%BC%B8%E5%85%A5%E6%B3%95%E5%88%87%E6%8F%9B-(-MS-IME-)/"/>
+    <id>http://blake31113.github.io/2013/02/15/日文輸入法切換-(-MS-IME-)/</id>
+    <published>2013-02-15T06:25:00.000Z</published>
+    <updated>2014-07-12T06:11:24.000Z</updated>
+    <content type="html"><![CDATA[<p>切換到日文輸入法時<br>常常會變成英文<br>而還要用滑鼠點擊才能換回平假名輸入</p>
+<p>其實只要使用快捷鍵即可輕鬆換回平假名輸入法了<br> <a id="more"></a><br>Ctrl+Caps Lock &nbsp;= 切換為平假名<br>Alt+Caps Lock &nbsp; = 切換為片假名<br>Shift+Caps Lock = 切換為英文</p>
+]]></content>
+    <summary type="html"><![CDATA[<p>切換到日文輸入法時<br>常常會變成英文<br>而還要用滑鼠點擊才能換回平假名輸入</p>
+<p>其實只要使用快捷鍵即可輕鬆換回平假名輸入法了<br> ]]></summary>
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[入門單眼比較?]]></title>
+    <link href="http://blake31113.github.io/2012/08/19/%E5%85%A5%E9%96%80%E5%96%AE%E7%9C%BC%E6%AF%94%E8%BC%83/"/>
+    <id>http://blake31113.github.io/2012/08/19/入門單眼比較/</id>
+    <published>2012-08-18T20:01:00.000Z</published>
+    <updated>2014-07-12T06:12:12.000Z</updated>
+    <content type="html"><![CDATA[<p>N家比較</p>
+<p>CMOS:<br>D7000和D5100的CMOS雖然是同一期的<br>但CMOS品質D7000比D5100 稍好<br> <a id="more"></a><br>D3200 比D5100 新 &nbsp;畫素比較高 &nbsp;錄影品質比較好<br>但CMOS等級 跟D7K和D5100比起來遜色</p>
+<p>機身馬達:<br>D7K &nbsp;D90 有機身馬達<br>之後另添增鏡頭可以裝 D 鏡(沒馬達) 和 G鏡(有馬達)<br>D鏡是雖然是老的鏡頭 但品質和價錢都很漂亮<br>G鏡 是新鏡頭 品質跟D鏡比起來有好有壞 但是價錢高很多</p>
+<p>D5100、D3200 沒機身馬達<br>只能配G鏡<br>但是現在高階鏡頭都是G鏡了</p>
+<p>操作性:<br>D7K和D90的握感都不錯<br>D5100對手大的人來說 會翹小指 (我手小0.0 握起來是剛剛好<br>D7K 和 D90 操作性都很好 有雙轉盤+機頂螢幕+按鍵多 控制幾乎可用按鍵調整所有參數<br>D5100 則有翻轉螢幕(適合新手構圖) 但是 但無雙轉盤 無機頂螢幕 有些控制需要在menu裡面調整參數</p>
+<p>夜景&amp;ISO處理:<br>D7K CMOS比D90新 &nbsp;夜景拍起來 D7K&gt;D90<br>D7K&gt;D5100&gt;&gt;D3200&gt;D90</p>
+<p>D90 俗稱 戰神 &nbsp;在2008年生產 至2011 五月才停產<br>在3C產品這麼高汰換率的環境下<br>還能夠生存這麼久 可見他的 性能 規格 品質都有一定等級</p>
+<p>綜合比較:<br>D7000&gt;D90&gt;D5100&gt;D3200</p>
+<p>個人建議<br>如果預算夠 就上D7K +18-105mm kit組<br>加上暑期活動 免費送一顆大光圈爽爽<br><a href="http://www.nikonschool.com.tw/news/news_detail.php?ID=266" target="_blank" rel="external">http://www.nikonschool.com.tw/news/news_detail.php?ID=266</a><br>現在價錢好像4萬6左右</p>
+<p>預算較吃緊<br>D5100 + 18-105mm (不是kit 組<br>加上活動<br><a href="http://www.nikonschool.com.tw/news/news_detail.php?ID=270" target="_blank" rel="external">http://www.nikonschool.com.tw/news/news_detail.php?ID=270</a><br><a href="http://www.nikonschool.com.tw/news/news_detail.php?ID=261" target="_blank" rel="external">http://www.nikonschool.com.tw/news/news_detail.php?ID=261</a><br>送 16G + 原電一顆<br>看需求 是否購入 35mm f/1.8G 大光圈那顆 賺3600<br>大光圈 人像++++ 散景+++<br>(OS: 幹 早買早想受 &nbsp; 晚買 折扣一堆 </p>
+<p>或者 目前不怎麼急著買 可以等 之後的D600<br>乳摸表示 不是APS-C 之首 &nbsp;就是便宜大碗的FF機</p>
+<p>又或者你預算超多 錢花不完 你可以直上 D4 或是 D800<br>D800 擁有 恐怖 驚人 的 解像能力+3600萬畫素 &nbsp;可以將 拍壞照片 還原至正常照片的能力</p>
+<p>D4 &nbsp;超級11fps 連拍<br><a href="http://www.dailymail.co.uk/news/article-2186096/London-2012-Olympics-Usain-Bolt-grabs-camera-snaps-historic-frame-winning-200m-final.html" target="_blank" rel="external">http://www.dailymail.co.uk/news/article-2186096/London-2012-Olympics-Usain-Bolt-grabs-camera-snaps-historic-frame-winning-200m-final.html</a><br>最速男D4</p>
+<p>C家<br>研究沒那麼多<br>大概就是 60D~650D&gt;600D&gt;550D<br>價錢 60D&gt;650D&gt;600D&gt;550D</p>
+<p>CANON 不用考慮有無機身馬達的問題 因為鏡頭都有了<br>只是價錢就會高些</p>
+<p>650D 除了有翻轉螢幕外 還有 觸控對焦 (史上第一台) +全新的對焦系統</p>
+<p>建議<br>預算夠 可以買650D+18-55mm<br>玩玩那超潮的觸控對焦 &nbsp;還有操控<br>或是 60D+18-135mm<br>60D 算是中階機體 有翻轉螢幕 雙轉盤 機頂螢幕</p>
+<p>雖然650D算是入門機 但是比起來 &nbsp;650D 跟60D 不分上下 要看個人喜好<br>觸控對焦+STM對焦系統VS操作性</p>
+<p>預算較吃緊<br>600D +18-135mm 這我就不知道價錢是否親民? &nbsp;我看都是18-55比較多<br>18-135mm 可以挑 副廠 SIGMA的 比較便宜</p>
+<p>550D 也是不錯 如果只是玩玩 可以買二手的這台<br>+EF-S 15-85mm f/3.5-5.6 IS USM<br>就很讚了</p>
+<p>C家跟N家 發色 也會考慮原因之一 建議可以先去看 各大開箱文</p>
+<p>除了N和C外 還有SONY 、 PENTEX 跟 Fuji 還有 微單眼一整大塊<br>超不建議買類單<br>有以上需求再問我</p>
+<p>購買單眼 其外周邊 、腳架、單眼包、保護鏡、CPL、ND減光鏡、防潮箱、清鏡組、閃光燈、快門線、記憶卡</p>
+<p>記憶卡 記得挑SANDISK的 &nbsp;創見的……用久就知道 (如果是送的就算了</p>
+<p>腳架 能上就上好的 可以用很久</p>
+<p>大概就這樣</p>
+<p>單眼之路 用地名形容再適合不過-深坑</p>
+]]></content>
+    <summary type="html"><![CDATA[<p>N家比較</p>
+<p>CMOS:<br>D7000和D5100的CMOS雖然是同一期的<br>但CMOS品質D7000比D5100 稍好<br> ]]></summary>
+    
+      <category term="[攝影]" scheme="http://blake31113.github.io/tags/-%E6%94%9D%E5%BD%B1/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[雜言] 近況]]></title>
+    <link href="http://blake31113.github.io/2012/07/26/%5B%E5%BF%83%E6%83%85%5D-%E8%BF%91%E6%B3%81/"/>
+    <id>http://blake31113.github.io/2012/07/26/[心情]-近況/</id>
+    <published>2012-07-26T04:21:00.000Z</published>
+    <updated>2014-07-12T06:17:50.000Z</updated>
+    <content type="html"><![CDATA[<p><div class="separator" style="clear: both; text-align: center;"><object class="BLOGGER-youtube-video" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0" data-thumbnail-src="http://3.gvt0.com/vi/COfKpHWg5dc/0.jpg" height="532" width="640"><param name="movie" value="http://www.youtube.com/v/COfKpHWg5dc&fs=1&source=uds"><param name="bgcolor" value="#FFFFFF"><param name="allowFullScreen" value="true"><embed width="640" height="532" src="http://www.youtube.com/v/COfKpHWg5dc&fs=1&source=uds" type="application/x-shockwave-flash" allowfullscreen="true"></object></div>原本想每天打一篇的<br>超級懶<br> <a id="more"></a><br>暑假初還過得蠻充實的<br>整天出外跑跑<br>-Ride Bike from 中壢 to 台北 35.2km<br>-點石成金 福隆 國際沙雕藝術節 騎單車 舊草嶺隧道 16km<br>-北投行 溫泉博物館 北投圖書館 凱達格蘭博物館<br>-白沙灣 獨人行<br>-攝影展<br>.<br>..<br>…<br>但最近日趨穩定<br>-在家耍廢</p>
+<p>其實在家<br>也可以做些有意義的事情<br>並不只有打Game<br>我Game已經戒掉有一段時間了XD<br>整天打Game感覺有點揮霍時間</p>
+<p>一天 一兩場發人省思的電影</p>
+<p>學些不一樣的程式<br>-為了在下學加入記中網管ㄋㄟㄋㄟ行列<br>-php+MySQL 不可少</p>
+<p>&nbsp;看些書<br>-讀者文摘</p>
+<p>看些文章<br>-PTT<br>-7HeadLines</p>
+<p>我覺得都很不錯</p>
+<p>有些細節之後再細說</p>
+]]></content>
+    <summary type="html"><![CDATA[<p><div class="separator" style="clear: both; text-align: center;"><object class="BLOGGER-youtube-video" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0" data-thumbnail-src="http://3.gvt0.com/vi/COfKpHWg5dc/0.jpg" height="532" width="640"><param name="movie" value="http://www.youtube.com/v/COfKpHWg5dc&fs=1&source=uds"><param name="bgcolor" value="#FFFFFF"><param name="allowFullScreen" value="true"><embed width="640" height="532" src="http://www.youtube.com/v/COfKpHWg5dc&fs=1&source=uds" type="application/x-shockwave-flash" allowfullscreen="true"></object></div>原本想每天打一篇的<br>超級懶<br> ]]></summary>
+    
+      <category term="[雜言]" scheme="http://blake31113.github.io/tags/-%E9%9B%9C%E8%A8%80/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[遊]多媒體展 腳架購買 淡水夜拍]]></title>
+    <link href="http://blake31113.github.io/2012/07/09/%5B%E9%81%8A%5D%E5%A4%9A%E5%AA%92%E9%AB%94%E5%B1%95-%E8%85%B3%E6%9E%B6%E8%B3%BC%E8%B2%B7-%E6%B7%A1%E6%B0%B4%E5%A4%9C%E6%8B%8D/"/>
+    <id>http://blake31113.github.io/2012/07/09/[遊]多媒體展-腳架購買-淡水夜拍/</id>
+    <published>2012-07-09T02:02:00.000Z</published>
+    <updated>2014-07-11T03:14:52.000Z</updated>
+    <content type="html"><![CDATA[<div class="separator" style="clear: both; text-align: center;"></div><div class="separator" style="clear: both; text-align: left;"><img src="http://2.bp.blogspot.com/-XYkJ-ZPZ7VU/T_uwq7yiFkI/AAAAAAAACW4/2BwaCFcPBAQ/s640/_DSC0042-3.jpg" alt=""></div><br>7/9多媒體展最後一天<br> <a id="more"></a><br><a href="http://2.bp.blogspot.com/-XYkJ-ZPZ7VU/T_uwq7yiFkI/AAAAAAAACW4/2BwaCFcPBAQ/s1600/_DSC0042-3.jpg" target="_blank" rel="external">
+</a><br><div class="" style="clear: both; text-align: left;">就去看看吧</div><div class="" style="clear: both; text-align: left;">有學生證 就可以換得免費的票 A_A</div><div class="" style="clear: both; text-align: left;">感覺規模一年比一年小 還是我的錯覺!?</div><div class="" style="clear: both; text-align: left;"><br></div><div class="" style="clear: both; text-align: left;">還記得昨年是跟 慕帆 少弘 阿法 證傑 一起來的 買了台筆電我記得</div><div class="" style="clear: both; text-align: left;"><br></div><div class="" style="clear: both; text-align: left;">來多媒體展 最主要是要來A贈品</div><div class="" style="clear: both; text-align: left;">要論價錢 我覺得還是光華便宜 相機街便宜</div><div class="" style="clear: both; text-align: left;"><br></div><div class="" style="clear: both; text-align: left;">最後一天感覺工讀生比消費者多0.0</div><div class="" style="clear: both; text-align: left;"><br></div><div class="" style="clear: both; text-align: left;">繞個幾圈就閃人了 沒什麼好逛</div><div class="" style="clear: both; text-align: left;"><br></div><div class="" style="clear: both; text-align: left;">去忠孝復興-eWhat 買腳架</div><div class="" style="clear: both; text-align: left;"><br></div><div class="" style="clear: both; text-align: left;">店員推薦的 跟來這邊的目的 都是同一支</div><div class="" style="clear: both; text-align: left;">窮人腳架 Takara- TMK-244b</div><div style="text-align: left;">&nbsp;第一天購買 就去淡水試試看功能如何 Go Go</div><div style="text-align: left;"><br>Sparrow, what are you looking for?</div><div style="text-align: left;"><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-fbxle21BPRs/T_zkkBDs6JI/AAAAAAAACbI/hc3IyEhDRHc/s1600/_DSC0195-1.JPG" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-fbxle21BPRs/T_zkkBDs6JI/AAAAAAAACbI/hc3IyEhDRHc/s640/_DSC0195-1.JPG" alt=""></a></div><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div style="text-align: left;">夏日序曲</div>用D5100 內建的間隔攝影功能拍的<br>只能搭配腳架才能拍攝<br>正好來玩玩吧<br><iframe allowfullscreen frameborder="0" height="315" src="http://www.youtube.com/embed/n1vVRP1t3_g" width="420"></iframe><br>感覺不錯<br>只是太少張<br><div style="text-align: left;"><br></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;">夕陽時分<br>阿~好想買CPL</div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-w9XeybClLQA/T_uwikjH2HI/AAAAAAAACUg/diuXfutEcGk/s1600/_DSC0412.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-w9XeybClLQA/T_uwikjH2HI/AAAAAAAACUg/diuXfutEcGk/s640/_DSC0412.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-iUnLa2M1Hww/T_uwiCUdgwI/AAAAAAAACUQ/2kCf28_Bfh8/s1600/_DSC0404.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-iUnLa2M1Hww/T_uwiCUdgwI/AAAAAAAACUQ/2kCf28_Bfh8/s640/_DSC0404.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://4.bp.blogspot.com/-RG6bYC6m3mY/T_uwiTpaBxI/AAAAAAAACUY/VCb1mf69NHo/s1600/_DSC0407.JPG" target="_blank" rel="external"><img src="http://4.bp.blogspot.com/-RG6bYC6m3mY/T_uwiTpaBxI/AAAAAAAACUY/VCb1mf69NHo/s640/_DSC0407.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/--nZpK5zgaVM/T_uwkyMUL5I/AAAAAAAACVQ/dFQTKFwco6g/s1600/_DSC0439.JPG" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/--nZpK5zgaVM/T_uwkyMUL5I/AAAAAAAACVQ/dFQTKFwco6g/s640/_DSC0439.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-c3PPYtr1Ys4/T_uwmcyUzNI/AAAAAAAACVY/imJ2gid8gA4/s1600/_DSC0444.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-c3PPYtr1Ys4/T_uwmcyUzNI/AAAAAAAACVY/imJ2gid8gA4/s640/_DSC0444.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://3.bp.blogspot.com/-DtZPXcdHP2U/T_uwoZX5S_I/AAAAAAAACWA/FEuwzGTpfBQ/s1600/_DSC0460.JPG" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-DtZPXcdHP2U/T_uwoZX5S_I/AAAAAAAACWA/FEuwzGTpfBQ/s640/_DSC0460.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-wNrJ_aNELV4/T_uwohpAk_I/AAAAAAAACWI/HixaaEicxxc/s1600/_DSC0464.JPG" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-wNrJ_aNELV4/T_uwohpAk_I/AAAAAAAACWI/HixaaEicxxc/s640/_DSC0464.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-lRIChfFjxbc/T_uwpLxWAqI/AAAAAAAACWQ/DxDOZUnlY0g/s1600/_DSC0465.JPG" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-lRIChfFjxbc/T_uwpLxWAqI/AAAAAAAACWQ/DxDOZUnlY0g/s640/_DSC0465.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://3.bp.blogspot.com/-eoYviED9i0Y/T_uwqhytwNI/AAAAAAAACWw/evp5yph3-k8/s1600/_DSC0489.JPG" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-eoYviED9i0Y/T_uwqhytwNI/AAAAAAAACWw/evp5yph3-k8/s640/_DSC0489.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br>晚餐</div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-fmVe5IYcNLY/T_uwwynF_kI/AAAAAAAACYo/Gv551UTKA9M/s1600/_DSC0505.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-fmVe5IYcNLY/T_uwwynF_kI/AAAAAAAACYo/Gv551UTKA9M/s640/_DSC0505.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-WotcSKHRnOs/T_uwxV5zmmI/AAAAAAAACYw/Q30rFFnNtAI/s1600/_DSC0506.JPG" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-WotcSKHRnOs/T_uwxV5zmmI/AAAAAAAACYw/Q30rFFnNtAI/s640/_DSC0506.JPG" alt=""></a></div><div style="text-align: left;"><br><br>架腳架長曝</div><div class="separator" style="clear: both; text-align: left;"><a href="http://4.bp.blogspot.com/-QEe2-7Wo2ms/T_uwxgO0fiI/AAAAAAAACY4/RSIB9oT9eu4/s1600/_DSC0510.JPG" target="_blank" rel="external"><img src="http://4.bp.blogspot.com/-QEe2-7Wo2ms/T_uwxgO0fiI/AAAAAAAACY4/RSIB9oT9eu4/s640/_DSC0510.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://3.bp.blogspot.com/--rpy02CYHJ0/T_uwyETtL3I/AAAAAAAACZA/y-TnqQvZUwA/s1600/_DSC0511.JPG" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/--rpy02CYHJ0/T_uwyETtL3I/AAAAAAAACZA/y-TnqQvZUwA/s640/_DSC0511.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-fsTEyrEhQSY/T_uwyQKcoLI/AAAAAAAACZI/23c_uYr6dE0/s1600/_DSC0521.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-fsTEyrEhQSY/T_uwyQKcoLI/AAAAAAAACZI/23c_uYr6dE0/s640/_DSC0521.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-T6aA9Xbu-sY/T_uwyoFsKwI/AAAAAAAACZQ/cpqPLuhHyCo/s1600/_DSC0522.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-T6aA9Xbu-sY/T_uwyoFsKwI/AAAAAAAACZQ/cpqPLuhHyCo/s640/_DSC0522.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-qoIBZCKD_zA/T_uwy3MahtI/AAAAAAAACZY/GGNWPIyJDaE/s1600/_DSC0527+-1.jpg" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-qoIBZCKD_zA/T_uwy3MahtI/AAAAAAAACZY/GGNWPIyJDaE/s640/_DSC0527+-1.jpg" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-zqe84y44Fvc/T_uwzvNCn-I/AAAAAAAACZo/2QOozHt1YGU/s1600/_DSC0542-4.jpg" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-zqe84y44Fvc/T_uwzvNCn-I/AAAAAAAACZo/2QOozHt1YGU/s640/_DSC0542-4.jpg" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"></div><div style="text-align: left;">淡水老街<br>滿滿的情侶 滿滿的閃光<br>好揪心<br>唉</div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-GWz_Wdwuv2A/T_uwrj_WHxI/AAAAAAAACXI/B7VQxA9E2pw/s1600/_DSC0618-1.jpg" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-GWz_Wdwuv2A/T_uwrj_WHxI/AAAAAAAACXI/B7VQxA9E2pw/s640/_DSC0618-1.jpg" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-1UOhPziTZP4/T_uwr_CdWhI/AAAAAAAACXQ/3r_fj7zA2VQ/s1600/_DSC0621.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-1UOhPziTZP4/T_uwr_CdWhI/AAAAAAAACXQ/3r_fj7zA2VQ/s640/_DSC0621.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://4.bp.blogspot.com/-Uqp9hkedN6o/T_uwsN0MiMI/AAAAAAAACXY/lNLK5vi90dU/s1600/_DSC0622.JPG" target="_blank" rel="external"><img src="http://4.bp.blogspot.com/-Uqp9hkedN6o/T_uwsN0MiMI/AAAAAAAACXY/lNLK5vi90dU/s640/_DSC0622.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-nZJPHMtQqsg/T_uwsiOlYSI/AAAAAAAACXg/XrFcHG5Y0yc/s1600/_DSC0623.JPG" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-nZJPHMtQqsg/T_uwsiOlYSI/AAAAAAAACXg/XrFcHG5Y0yc/s640/_DSC0623.JPG" alt=""></a></div><div style="text-align: left;"><br>路過的一對夫婦帶著小孩<br>婦:你們在這裡幹什麼壓?<br>我們:夜拍淡水囉<br>婦:恩 淡水晚上拍起來很漂亮 早上來都沒有這種感覺呢<br>我們:對阿<br>婦:我也是玩Art的 加油加油!<br><br>偶遇<br><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-KytcXgoc2wY/T_uwtK3S25I/AAAAAAAACXo/VSCK6MD1CbY/s1600/_DSC0624.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-KytcXgoc2wY/T_uwtK3S25I/AAAAAAAACXo/VSCK6MD1CbY/s640/_DSC0624.JPG" alt=""></a></div><div style="text-align: left;"><br><br>Stock cosplay</div><div class="separator" style="clear: both; text-align: left;"><a href="http://4.bp.blogspot.com/-sml8aR0bZfY/T_uwtVVkObI/AAAAAAAACXw/9Jjx9UJczO8/s1600/_DSC0625.JPG" target="_blank" rel="external"><img src="http://4.bp.blogspot.com/-sml8aR0bZfY/T_uwtVVkObI/AAAAAAAACXw/9Jjx9UJczO8/s640/_DSC0625.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-6fGf4C74w6c/T_uwuMU66yI/AAAAAAAACX4/N264w9-tIcI/s1600/_DSC0626.JPG" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-6fGf4C74w6c/T_uwuMU66yI/AAAAAAAACX4/N264w9-tIcI/s640/_DSC0626.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-Q6DRR7-cEL4/T_uwu4wp00I/AAAAAAAACYA/gWoWH8N3onw/s1600/_DSC0629.JPG" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-Q6DRR7-cEL4/T_uwu4wp00I/AAAAAAAACYA/gWoWH8N3onw/s640/_DSC0629.JPG" alt=""></a></div><div style="text-align: left;"><br><br>淡水</div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-WOa5FXvFlCE/T_uwvmMVqOI/AAAAAAAACYI/CX6quWNOlW4/s1600/_DSC0631.JPG" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-WOa5FXvFlCE/T_uwvmMVqOI/AAAAAAAACYI/CX6quWNOlW4/s640/_DSC0631.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://4.bp.blogspot.com/-97fF9UgfxWg/T_uwv-rzgVI/AAAAAAAACYQ/ghACQFmAvdw/s1600/_DSC0633.JPG" target="_blank" rel="external"><img src="http://4.bp.blogspot.com/-97fF9UgfxWg/T_uwv-rzgVI/AAAAAAAACYQ/ghACQFmAvdw/s640/_DSC0633.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://3.bp.blogspot.com/-ZIezGILJbfE/T_uwwRHnKnI/AAAAAAAACYY/dGzHKR0SUjM/s1600/_DSC0634.JPG" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-ZIezGILJbfE/T_uwwRHnKnI/AAAAAAAACYY/dGzHKR0SUjM/s640/_DSC0634.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: center;"></div><div style="text-align: left;"><br></div>
+
+<p>TMK-244b </p>
+<p>1.TMK-244b在沒風的情況下還蠻穩的，卡榫，球狀雲台，摸一會就熟悉它的操作了</p>
+<p>2.TMK-244b在山上拍 應該會被風吹得很晃吧</p>
+<p>3.TMK-244b掛勾是否有實際作用,可能要在風大的時候實驗(不過相機不會放上去?</p>
+<p>4.TMK-244b窮人首選</p>
+<div style="text-align: left;"><br></div><div style="text-align: left;"><br></div><div style="text-align: left;"><br></div><div style="text-align: left;"><br></div>]]></content>
+    <summary type="html"><![CDATA[<div class="separator" style="clear: both; text-align: center;"></div><div class="separator" style="clear: both; text-align: left;"><img src="http://2.bp.blogspot.com/-XYkJ-ZPZ7VU/T_uwq7yiFkI/AAAAAAAACW4/2BwaCFcPBAQ/s640/_DSC0042-3.jpg" alt=""></div><br>7/9多媒體展最後一天<br> ]]></summary>
+    
+      <category term="[遊]" scheme="http://blake31113.github.io/tags/-%E9%81%8A/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[分享]PhotoIRemote 智慧型手機 android 遙控單眼]]></title>
+    <link href="http://blake31113.github.io/2012/07/06/%5B%E5%88%86%E4%BA%AB%5DPhotoIRemote-%E6%99%BA%E6%85%A7%E5%9E%8B%E6%89%8B%E6%A9%9F-android-%E9%81%99%E6%8E%A7%E5%96%AE%E7%9C%BC/"/>
+    <id>http://blake31113.github.io/2012/07/06/[分享]PhotoIRemote-智慧型手機-android-遙控單眼/</id>
+    <published>2012-07-06T04:36:00.000Z</published>
+    <updated>2014-07-11T03:11:59.000Z</updated>
+    <content type="html"><![CDATA[<div style="text-align: left;">在網路上</div><div style="text-align: left;">發現了這碗糕</div><div style="text-align: left;"><br></div><div style="text-align: left;">Photo IR remoter 智慧型手機 控制 單眼&nbsp;<span style="background-color: white;">&nbsp;</span><span style="background-color: white;">Android</span><span style="background-color: white;">&nbsp;</span></div><div style="text-align: left;">Smart phone control DSLR with IR remote</div><div style="text-align: left;"><br></div><div style="text-align: left;">材料便宜 簡單容易 去光華買好材料就動工了</div><div style="text-align: left;"><br></div><div style="text-align: left;">首先準備材料</div><div class="separator" style="clear: both; text-align: left;"><br></div><div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-sSKhR9jow58/T_Zh2fd7CKI/AAAAAAAABbg/-dpRtFWR3IA/s1600/_DSC0062.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-sSKhR9jow58/T_Zh2fd7CKI/AAAAAAAABbg/-dpRtFWR3IA/s640/_DSC0062.JPG" alt=""></a></div><br> <a id="more"></a><br><div style="text-align: left;">廢棄的 音源線 3.5mm x1 &nbsp;我買雙頭信號傳輸線 一包<span style="background-color: white;">NT</span><span style="background-color: white;">20&nbsp;</span></div><div style="text-align: left;">940nm IR LED <em>2 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="background-color: white;">NT</span><span style="background-color: white;">15/顆</span></em></div><div class="separator" style="clear: both; text-align: left;"><a href="http://3.bp.blogspot.com/-NbV1F3q2fOI/T_Zh214zUnI/AAAAAAAABbk/1WSgM61RcHI/s1600/_DSC0063.JPG" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-NbV1F3q2fOI/T_Zh214zUnI/AAAAAAAABbk/1WSgM61RcHI/s640/_DSC0063.JPG" alt=""></a></div><div style="text-align: left;">&nbsp;用美工刀把外層剝掉</div><div style="text-align: left;">再用鉗子把白色 紅色線的外層剝去</div><div style="text-align: left;">(黃色那條是接地線 不用去理他 我把它剪了</div><div class="separator" style="clear: both; text-align: left;"><a href="http://3.bp.blogspot.com/-0_lE5IWM6Cs/T_Zh3ZgAtzI/AAAAAAAABbs/aioaGMK6C1w/s1600/_DSC0066.JPG" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-0_lE5IWM6Cs/T_Zh3ZgAtzI/AAAAAAAABbs/aioaGMK6C1w/s640/_DSC0066.JPG" alt=""></a></div><div style="text-align: left;">&nbsp;Like this</div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-dC4h-quazaY/T_Zh4AWGa8I/AAAAAAAABb0/5Y7xvdx5GtY/s1600/_DSC0068.JPG" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-dC4h-quazaY/T_Zh4AWGa8I/AAAAAAAABb0/5Y7xvdx5GtY/s640/_DSC0068.JPG" alt=""></a></div><div style="text-align: left;">再來是LED</div><div style="text-align: left;">將短的接長的</div><div style="text-align: left;">長的接短的&nbsp;</div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-w_OskKKNo-U/T_Zh4gRDuRI/AAAAAAAABcA/KSeUQy8821A/s1600/_DSC0070.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-w_OskKKNo-U/T_Zh4gRDuRI/AAAAAAAABcA/KSeUQy8821A/s640/_DSC0070.JPG" alt=""></a></div><div style="text-align: left;">Like this&nbsp;</div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://3.bp.blogspot.com/-QvNOVaWeSek/T_Zh5VpmxvI/AAAAAAAABcE/Kxq_-NfRMrI/s1600/_DSC0071.JPG" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-QvNOVaWeSek/T_Zh5VpmxvI/AAAAAAAABcE/Kxq_-NfRMrI/s640/_DSC0071.JPG" alt=""></a></div><div style="text-align: left;">在把紅色端綑在LED一側</div><div style="text-align: left;">白色端綑在LED另一側</div><div style="text-align: left;">就大功告成了</div><div style="text-align: left;"><span style="background-color: white;">(用焊錫比較穩固</span></div><div style="text-align: left;"><span style="background-color: white;">(家裡沒有 就只能簡單的綑一綑XD&nbsp;</span></div><div style="text-align: left;"><br></div><div style="text-align: left;">Android 手機下載</div><div style="text-align: left;"><a href="https://play.google.com/store/apps/details?id=com.wegroo.ircamshooter&amp;hl=zh_TW" target="_blank" rel="external">https://play.google.com/store/apps/details?id=com.wegroo.ircamshooter&amp;hl=zh_TW</a></div><div style="text-align: left;"><br></div><div style="text-align: left;">就大功告成囉</div><div style="text-align: left;"><br></div><div style="text-align: left;"><br></div><div style="text-align: left;"><br></div><div style="text-align: left;">TEST</div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-Dp0BhCnsSlU/T_Zh6vGx_FI/AAAAAAAABcQ/ikEeOjYyHXQ/s1600/_DSC0089.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-Dp0BhCnsSlU/T_Zh6vGx_FI/AAAAAAAABcQ/ikEeOjYyHXQ/s640/_DSC0089.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://1.bp.blogspot.com/-0TTXWeFYNak/T_Zh6EqGvBI/AAAAAAAABcM/30Mq5mkzBys/s1600/_DSC0081.JPG" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-0TTXWeFYNak/T_Zh6EqGvBI/AAAAAAAABcM/30Mq5mkzBys/s640/_DSC0081.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://4.bp.blogspot.com/-K24cZgaTHfY/T_Zh7XlNlJI/AAAAAAAABcc/0bK9EoPAGY0/s1600/_DSC0090.JPG" target="_blank" rel="external"><img src="http://4.bp.blogspot.com/-K24cZgaTHfY/T_Zh7XlNlJI/AAAAAAAABcc/0bK9EoPAGY0/s640/_DSC0090.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div class="separator" style="clear: both; text-align: left;"><a href="http://2.bp.blogspot.com/-uw5xdRRbeYo/T_Zh8Qk18OI/AAAAAAAABcs/m1u6tHKv2UI/s1600/_DSC0109.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-uw5xdRRbeYo/T_Zh8Qk18OI/AAAAAAAABcs/m1u6tHKv2UI/s640/_DSC0109.JPG" alt=""></a></div><div style="text-align: left;"><br></div><div style="text-align: left;"><br></div><div style="text-align: left;">居然成功了</div><div style="text-align: left;"><br></div><div style="text-align: left;">我看網路上 都說我家Desire HD 音源輸出不夠力</div><div style="text-align: left;">會失效</div><div style="text-align: left;">居然被我試成功了</div><div style="text-align: left;"><br></div><div style="text-align: left;">爽爽</div><div style="text-align: left;"><br></div><div style="text-align: left;">1.LED 需要某個角度才會成功的樣子</div><div style="text-align: left;">2.單顆LED 也可以觸發&nbsp;</div><div style="text-align: left;">3.距離可以5~8顆拳頭(角度要對</div><div style="text-align: left;"><br></div><div style="text-align: left;"><br></div><div style="text-align: left;">花費連一個50元都不到</div><div style="text-align: left;">雖然有些不穩定</div><div style="text-align: left;">不過還是蠻爽的</div><div style="text-align: left;">充滿成就感</div><div style="text-align: left;"><br></div><div style="text-align: left;"><span style="color: #e06666; font-size: x-large;"><em>*第一次DIY就上手</em></span></div>]]></content>
+    <summary type="html"><![CDATA[<div style="text-align: left;">在網路上</div><div style="text-align: left;">發現了這碗糕</div><div style="text-align: left;"><br></div><div style="text-align: left;">Photo IR remoter 智慧型手機 控制 單眼&nbsp;<span style="background-color: white;">&nbsp;</span><span style="background-color: white;">Android</span><span style="background-color: white;">&nbsp;</span></div><div style="text-align: left;">Smart phone control DSLR with IR remote</div><div style="text-align: left;"><br></div><div style="text-align: left;">材料便宜 簡單容易 去光華買好材料就動工了</div><div style="text-align: left;"><br></div><div style="text-align: left;">首先準備材料</div><div class="separator" style="clear: both; text-align: left;"><br></div><div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-sSKhR9jow58/T_Zh2fd7CKI/AAAAAAAABbg/-dpRtFWR3IA/s1600/_DSC0062.JPG" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-sSKhR9jow58/T_Zh2fd7CKI/AAAAAAAABbg/-dpRtFWR3IA/s640/_DSC0062.JPG" alt=""></a></div><br> ]]></summary>
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[分享]無名 匯入 轉 blogger]]></title>
+    <link href="http://blake31113.github.io/2012/07/03/%5B%E5%88%86%E4%BA%AB%5D%E7%84%A1%E5%90%8D-%E5%8C%AF%E5%85%A5-%E8%BD%89-blogger/"/>
+    <id>http://blake31113.github.io/2012/07/03/[分享]無名-匯入-轉-blogger/</id>
+    <published>2012-07-03T04:10:00.000Z</published>
+    <updated>2014-07-11T03:15:36.000Z</updated>
+    <content type="html"><![CDATA[<p><iframe allowfullscreen frameborder="0" height="315" src="http://www.youtube.com/embed/4Zj-I8XSjB0" width="420"></iframe><br> <a id="more"></a><br>耶爽 把無名的舊文章 轉到這裡了</p>
+<p>來篇教學文</p>
+<p>去無名後台 基本設定-&gt;備份下載</p>
+<p>會下載到一個XML檔</p>
+<p>再去下載↓<br><a href="http://sourceforge.net/projects/blogtrans/files/" target="_blank" rel="external">blogtrans</a></p>
+<p>介面很容易</p>
+<p>按下匯入</p>
+<p>選擇剛下載的XML檔</p>
+<p>就可以看到舊網誌的文章和留言了</p>
+<p>在按下匯出</p>
+<p>就可以轉換成blogger使用的格式</p>
+<p>再去blogger後台 選擇 設定-&gt;其他-&gt;匯入網誌</p>
+<p>然後就開始匯入囉</p>
+<p>等個幾分鐘(隨文章量) 就好囉</p>
+<p>可是在blogger可能和看不到舊文章</p>
+<p>因為還沒發布的關係</p>
+<p>只要在發表文章那</p>
+<p>將舊文章發表出去就OK了</p>
+]]></content>
+    <summary type="html"><![CDATA[<p><iframe allowfullscreen frameborder="0" height="315" src="http://www.youtube.com/embed/4Zj-I8XSjB0" width="420"></iframe><br> ]]></summary>
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[雜言]就這樣結束了嗎..]]></title>
+    <link href="http://blake31113.github.io/2012/07/03/%5B%E5%BF%83%E6%83%85%5D%E5%B0%B1%E9%80%99%E6%A8%A3%E7%B5%90%E6%9D%9F%E4%BA%86%E5%97%8E/"/>
+    <id>http://blake31113.github.io/2012/07/03/[心情]就這樣結束了嗎/</id>
+    <published>2012-07-02T17:00:00.000Z</published>
+    <updated>2014-07-12T06:17:50.000Z</updated>
+    <content type="html"><![CDATA[<p> <a id="more"></a><br>我還有好多事情還沒說逆<br>幹 我完全沒有想到事情會這樣發展….</p>
+<p>還會有另一個人來啊 (1+1<br>完全沒意料到<br>哎呀<br>一開始還以為是家庭聚會後親戚之類的</p>
+<p>後來觀察原來是 大學同學(吳小姐)阿<br>阿 一整個被搞得無言</p>
+<p>我都不知道該怎麼說下去了<br>哎呀</p>
+<p>面對面說話<br>口乾舌燥<br>是太緊張嗎</p>
+<p>說的時候電話一直來 強悍捏</p>
+<p>斷斷續續 我都不知說什麼了</p>
+<p>哎呀</p>
+<p>這下我又看到自己的缺點了</p>
+<p>今天大概傳達內容只有10/100而已(或許還不到</p>
+<p>半個小時不到就這麼草草結束了</p>
+<p>或許自己也有錯 因為跟當初說的好像有點不一樣</p>
+<p>也知道妳有妳的生活圈</p>
+<p>妳有妳的好姊妹們</p>
+<p>哎呀</p>
+<p>面對面表達能力 &nbsp; &nbsp; 0分<br>交涉能力 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 0分<br>事件立即處理能力 0分</p>
+<p>場面整個被控制住了</p>
+<p>無解</p>
+<p>暫時無解</p>
+<p><span style="background-color: white;">現階段</span>只能在繼續努力 改善下去</p>
+<p>應該要去認識更多人 增加更廣的生活圈才是上策</p>
+<p>依舊還是井底之蛙 現在</p>
+<p>想用自己的想法去控制其他人是不可能的</p>
+<p>Mission failed</p>
+<p>這學分被當了</p>
+<p>哎呀</p>
+<p>現在能播這首歌了</p>
+<iframe allowfullscreen frameborder="0" height="315" src="http://www.youtube.com/embed/amv7CzCmHU0" width="560"></iframe>
+
+<p>如果當初能不忘初衷<br>那現在會是什麼樣子呢<br>已經沒必要再想了<br>抬頭往前看吧<br>人生還很長呢<br>我還有家人跟一些支持我的朋友</p>
+<p>繼續努力吧<br>又是<br>Next Generation</p>
+<p>到底過了幾個階段呢<br>這也沒必要再想了</p>
+<p>哎呀</p>
+<p><span style="color: #333333; font-family: 'lucida grande', tahoma, verdana, arial, sans-serif; font-size: 14px; line-height: 18px; text-align: left;">“And why do we fall, Bruce? So we can learn to pick ourselves up.”</span><span style="color: #333333; font-family: 'lucida grande', tahoma, verdana, arial, sans-serif; font-size: 14px; line-height: 18px; text-align: left;">…Thomas Wayne</span></p>
+<div style="text-align: -webkit-auto;"><br></div><div style="text-align: -webkit-auto;">Go Go</div>]]></content>
+    <summary type="html"><![CDATA[<p> ]]></summary>
+    
+      <category term="[雜言]" scheme="http://blake31113.github.io/tags/-%E9%9B%9C%E8%A8%80/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[[遊]120622-一路向北]]></title>
+    <link href="http://blake31113.github.io/2012/06/23/%5B%E9%81%8A%5D120622-%E4%B8%80%E8%B7%AF%E5%90%91%E5%8C%97/"/>
+    <id>http://blake31113.github.io/2012/06/23/[遊]120622-一路向北/</id>
+    <published>2012-06-23T03:42:00.000Z</published>
+    <updated>2014-07-11T03:15:05.000Z</updated>
+    <content type="html"><![CDATA[<p>昨日考完試 收拾完行李</p>
+<p>因為颱風外流的關係</p>
+<p>依舊下著雨<br> <a id="more"></a><br>原本想說今天單車騎回台北的計畫會因下雨而延期</p>
+<p>但今早起來 天氣不錯</p>
+<p>些許的雲把太陽遮住加上微微的風</p>
+<p>去 全家 吃了份蛋白質餐後(茶葉蛋+豬排蛋堡+豆漿</p>
+<p>又去  我家  買了 捆 紅色塑膠繩 好綁行李</p>
+<p>跟還在睡的室友道別 </p>
+<p>接著就出發囉 </p>
+<p>揹著單眼+4.5kg的行李</p>
+<p>在觀景台附近 俯瞰中大路</p>
+<p>有點愜意　有點寂寞</p>
+<p>就衝拉</p>
+<p>靠雙腿跑完它</p>
+<p>路徑大概是這樣</p>
+<p><iframe frameborder="0" height="600" marginheight="0" marginwidth="0" scrolling="no" src="https://maps.google.com.tw/maps?f=d&amp;source=s_d&amp;saddr=%E4%B8%AD%E5%A4%AE%E5%A4%A7%E5%AD%B8&amp;daddr=24.9908999,121.3182458+to:%E8%BC%94%E4%BB%81%E5%A4%A7%E5%AD%B8+to:%E4%B8%AD%E8%88%88%E4%BA%8C%E6%9D%91&amp;geocode=FZMCfQEd9zg5ByG39Ux7nm0fTSnLTZDswSNoNDG39Ux7nm0fTQ%3BFbNUfQEdZSs7BykXsfyK-h5oNDGIcbkzyKi0mw%3BFdL3fQEdZ-88ByGERHiQ3-ldXSnv_MtP6KdCNDGERHiQ3-ldXQ%3BFctqfQEdfSs-ByECo8afQHgIfCm55P8R4KlCNDECo8afQHgIfA&amp;aq=&amp;sll=24.98668,121.322365&amp;sspn=0.02719,0.045447&amp;hl=zh-TW&amp;brcurrent=3,0x34681f0f6e5af91d:0x2008ac6a1dc572c3,0,0x34683d0eceda863f:0x54e44f52583a486a&amp;dirflg=w&amp;mra=dpe&amp;mrsp=1&amp;sz=15&amp;via=1&amp;ie=UTF8&amp;ll=24.98668,121.322365&amp;spn=0.02719,0.045447&amp;t=m&amp;output=embed" width="500"></iframe><br><span style="font-size: small;"><small><a href="https://maps.google.com.tw/maps?f=d&amp;source=embed&amp;saddr=%E4%B8%AD%E5%A4%AE%E5%A4%A7%E5%AD%B8&amp;daddr=24.9908999,121.3182458+to:%E8%BC%94%E4%BB%81%E5%A4%A7%E5%AD%B8+to:%E4%B8%AD%E8%88%88%E4%BA%8C%E6%9D%91&amp;geocode=FZMCfQEd9zg5ByG39Ux7nm0fTSnLTZDswSNoNDG39Ux7nm0fTQ%3BFbNUfQEdZSs7BykXsfyK-h5oNDGIcbkzyKi0mw%3BFdL3fQEdZ-88ByGERHiQ3-ldXSnv_MtP6KdCNDGERHiQ3-ldXQ%3BFctqfQEdfSs-ByECo8afQHgIfCm55P8R4KlCNDECo8afQHgIfA&amp;aq=&amp;sll=24.98668,121.322365&amp;sspn=0.02719,0.045447&amp;hl=zh-TW&amp;brcurrent=3,0x34681f0f6e5af91d:0x2008ac6a1dc572c3,0,0x34683d0eceda863f:0x54e44f52583a486a&amp;dirflg=w&amp;mra=dpe&amp;mrsp=1&amp;sz=15&amp;via=1&amp;ie=UTF8&amp;ll=24.98668,121.322365&amp;spn=0.02719,0.045447&amp;t=m" target="_blank" rel="external">檢視較大的地圖</a></small></span></p>
+<p>先到輔仁外看看在到家 呵呵</p>
+<p>一個穿著吊嘎男 穿著西松短褲 就這麼騎著騎著</p>
+<p>騎累了就休息喝口水</p>
+<p>路不知道就拿出手機查</p>
+<p>途中 遇到好多碎石子地</p>
+<p>聽到好大一聲　砰</p>
+<p>感覺越騎越緩</p>
+<p>預感是爆胎了</p>
+<p>拿出充氣筒來充</p>
+<p>又是一條好漢</p>
+<p>一路上充充停停</p>
+<p>也看到好多單車店</p>
+<p>但 都沒有停下腳步</p>
+<p>一路上又聽到幾次 砰</p>
+<p>才發覺</p>
+<p>欸 我腳踏車爆胎會有那麼大聲嗎</p>
+<p>那應該是機車輪胎發出的吧</p>
+<p>就繼續騎下去了</p>
+<p>中壢高中</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-xNoYbriPErA/T-508f_EIZI/AAAAAAAABVc/3-MlsDq-DVk/s1600/IMAG0322.jpg" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-xNoYbriPErA/T-508f_EIZI/AAAAAAAABVc/3-MlsDq-DVk/s640/IMAG0322.jpg" alt=""></a></div><br>中壢市公所</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://4.bp.blogspot.com/-0f0wBXiBv10/T-508xME25I/AAAAAAAABVk/IfIUB_mfoYk/s1600/IMAG0323.jpg" target="_blank" rel="external"><img src="http://4.bp.blogspot.com/-0f0wBXiBv10/T-508xME25I/AAAAAAAABVk/IfIUB_mfoYk/s640/IMAG0323.jpg" alt=""></a></div><br>原來家樂福在這裡</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-4BsC9pJ8J5c/T-50_MEOTeI/AAAAAAAABV4/KLFk2kIJKBw/s1600/IMAG0326.jpg" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-4BsC9pJ8J5c/T-50_MEOTeI/AAAAAAAABV4/KLFk2kIJKBw/s640/IMAG0326.jpg" alt=""></a></div><br>內壢車站</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-UwP1pM53Ml4/T-51ArB2M1I/AAAAAAAABWM/ldI51vEajo4/s1600/IMAG0330.jpg" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-UwP1pM53Ml4/T-51ArB2M1I/AAAAAAAABWM/ldI51vEajo4/s640/IMAG0330.jpg" alt=""></a></div><br>元智大學 (真的在鐵道旁..</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-qTM1ebI7bkg/T-51BMnHNUI/AAAAAAAABWU/EaEWX8GY8Qc/s1600/IMAG0331.jpg" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-qTM1ebI7bkg/T-51BMnHNUI/AAAAAAAABWU/EaEWX8GY8Qc/s640/IMAG0331.jpg" alt=""></a></div><br>武陵高中</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-GyP75NsucCY/T-51B-MyTeI/AAAAAAAABWc/B_m1XZ_4fjs/s1600/IMAG0332.jpg" target="_blank" rel="external"><img src="http://2.bp.blogspot.com/-GyP75NsucCY/T-51B-MyTeI/AAAAAAAABWc/B_m1XZ_4fjs/s640/IMAG0332.jpg" alt=""></a></div><br>桃園火車站</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-vVsfsiJs0QM/T-51DV1JP5I/AAAAAAAABWo/ZCk141TTZic/s1600/IMAG0334.jpg" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-vVsfsiJs0QM/T-51DV1JP5I/AAAAAAAABWo/ZCk141TTZic/s640/IMAG0334.jpg" alt=""></a></div><br>最深刻的應該是騎桃園縣到新北市那段</p>
+<p>萬壽路三段到東華壽路再到萬壽路一段接新北市</p>
+<p>萬壽路三段整段都是上坡</p>
+<p>上坡 平緩 上坡 平緩</p>
+<p>累翻天</p>
+<p>路上一共有三家小七</p>
+<p>推萬壽路二段上的小七</p>
+<p>店員很正哦</p>
+<p>還會幫客人拆雨傘</p>
+<p>買了雨傘和三包77乳加</p>
+<p>啃完其中一條就繼續上路</p>
+<p>騎單車最怕就是砂石車魔王</p>
+<p>但這條路上 魔王超多</p>
+<p>第一次騎遠程就上手的訣竅就是</p>
+<p>看到魔王就先停車讓他過XDDD</p>
+<p>你撞他它不痛 他撞你你就以兩倍速度飛了</p>
+<p>騎了不知道多久 終於到東華壽路</p>
+<p>這段真爽</p>
+<p>不用踩腳踏 一路下坡</p>
+<p>下坡完 還有下坡</p>
+<p>下坡完 還有下坡 </p>
+<p>下坡完 還有下坡 </p>
+<p>苦盡甘來的感覺 爽</p>
+<p>身上的汗水都乾了</p>
+<p>就這樣騎到新莊</p>
+<p>見到久違的1818</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-W99vxxTBY2M/T-51Ey3ZQ7I/AAAAAAAABW4/6cMybLOfXbM/s1600/IMAG0336.jpg" target="_blank" rel="external"><img src="http://1.bp.blogspot.com/-W99vxxTBY2M/T-51Ey3ZQ7I/AAAAAAAABW4/6cMybLOfXbM/s640/IMAG0336.jpg" alt=""></a></div><br>呵呵</p>
+<p>這裡的行人道有跟沒有一樣</p>
+<p>車子照樣開上去</p>
+<p>管你有沒有人= =</p>
+<p>只能一直鑽來鑽去</p>
+<p>從車車就可以看出附近人的身價</p>
+<p>中壢附近郊區</p>
+<p>看到4.5台 AUDI A6</p>
+<p>帥捏</p>
+<p>新莊這看到比較多BMW</p>
+<p>桃園市區就還好</p>
+<p>有錢人比較低調吧XD</p>
+<p>但是中壢市公所跟新莊區公所</p>
+<p>新莊大勝</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-mFPktta4nqc/T-51LA1aBZI/AAAAAAAABX4/KHWKsRhB3Z8/s1600/IMAG0346.jpg" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-mFPktta4nqc/T-51LA1aBZI/AAAAAAAABX4/KHWKsRhB3Z8/s640/IMAG0346.jpg" alt=""></a></div><br>到了輔仁 留著影後</p>
+<p>又繼續騎了</p>
+<p>市區騎車特別要小心路邊的車</p>
+<p>一開門你就飛了</p>
+<p>終於到了新海大橋</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-c7ETPgZHCM4/T-51Lizc2QI/AAAAAAAABYA/WyNrjivd8WE/s1600/IMAG0347.jpg" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-c7ETPgZHCM4/T-51Lizc2QI/AAAAAAAABYA/WyNrjivd8WE/s640/IMAG0347.jpg" alt=""></a></div><br>這..要怎麼上去呢</p>
+<p>原來有牽引橋</p>
+<p>Oh shit 好家在平常有在重訓</p>
+<p>這坡度+這腳踏車有點強阿</p>
+<p>還是上橋了</p>
+<p><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-88WDOEW-YgU/T-51NXrV0BI/AAAAAAAABYQ/JuuzqYaQYU4/s1600/IMAG0349.jpg" target="_blank" rel="external"><img src="http://3.bp.blogspot.com/-88WDOEW-YgU/T-51NXrV0BI/AAAAAAAABYQ/JuuzqYaQYU4/s640/IMAG0349.jpg" alt=""></a></div><br>不用跟車跟機車爭道</p>
+<p>整條路就只有我一個人的感覺還蠻不錯的</p>
+<p>但騎久了還是不好</p>
+<p>就這樣到了板橋</p>
+<p>好死不死給我下雨</p>
+<p>趴擦趴擦趴擦</p>
+<p>對流雨的強度可不是普通強</p>
+<p>騎到板橋火車站附近的時候</p>
+<p>99元的傘 馬上被風瓦解</p>
+<p>夠嗆的</p>
+<p>險在 附近大樓騎樓不錯多</p>
+<p>暫緩了下來</p>
+<p>沿著騎樓到了中和</p>
+<p>這時開始抱怨為什麼騎樓的高度都不一</p>
+<p>騎車整個麻煩…</p>
+<p>到了交流道</p>
+<p>沿著交流道</p>
+<p>到了智光商職</p>
+<p>到了家</p>
+<p>沒想到 我還真的成功了</p>
+<p><span style="color: orange;">We did it!</span></p>
+<p>35.2km</p>
+<p>消耗 2條77乳加 1瓶舒跑  1.6L的水 99元傘</p>
+<p>哈哈哈哈</p>
+<p><span style="color: red; font-size: large;"><strong>超熱血的拉</strong></span><br><strong><span style="font-size: x-large;"><br></span></strong><br><span style="color: yellow; font-size: x-large;"><strong>Mission Complete</strong></span></p>
+]]></content>
+    <summary type="html"><![CDATA[<p>昨日考完試 收拾完行李</p>
+<p>因為颱風外流的關係</p>
+<p>依舊下著雨<br> ]]></summary>
+    
+      <category term="[遊]" scheme="http://blake31113.github.io/tags/-%E9%81%8A/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[Summer Vacation!!]]></title>
+    <link href="http://blake31113.github.io/2012/06/22/Summer-Vacation!!/"/>
+    <id>http://blake31113.github.io/2012/06/22/Summer-Vacation!!/</id>
+    <published>2012-06-22T06:50:00.000Z</published>
+    <updated>2014-07-12T06:17:50.000Z</updated>
+    <content type="html"><![CDATA[<p>Finally, I completed the final exam of the computer science.</p>
+<p>I think The level of the the computer science is too high to test our.<br>I heard that this test will test transfer students who want to study in NCU CSIE from teaching assistant.<br>WTF…</p>
+<p>Go back to the dormitory.<br>After I pack my package, I took some picture of roommates and &nbsp;room 418 which contains lots of memories.</p>
+<p>Sign….</p>
+<p>Thank my roommates!</p>
+]]></content>
+    
+    
+      <category term="[雜言]" scheme="http://blake31113.github.io/tags/-%E9%9B%9C%E8%A8%80/"/>
+    
+  </entry>
+  
+</feed>
