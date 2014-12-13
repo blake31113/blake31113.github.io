@@ -4,7 +4,7 @@
   <subtitle><![CDATA[by Blake]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://blake31113.github.io/"/>
-  <updated>2014-12-13T15:02:46.324Z</updated>
+  <updated>2014-12-13T17:27:57.540Z</updated>
   <id>http://blake31113.github.io/</id>
   
   <author>
@@ -13,6 +13,69 @@
   </author>
   
   <generator uri="http://zespia.tw/hexo/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[test]]></title>
+    <link href="http://blake31113.github.io/2014/12/12/test/"/>
+    <id>http://blake31113.github.io/2014/12/12/test/</id>
+    <published>2014-12-12T04:56:00.000Z</published>
+    <updated>2014-12-13T17:27:40.000Z</updated>
+    <content type="html"><![CDATA[<p>使用Markdown格式寫過Github上的Readme後，再回去用Google Blogger寫blog，發現怎麼會有這麼難寫的設計,尤其在程式碼呈現的部分,就決定把blog換到別的地方去。</p>
+<p>支援Markdown格式的Blog Framework有</p>
+<ul>
+<li>Jekyll</li>
+<li>Octopress</li>
+<li>Hexo</li>
+<li>Logdown</li>
+<li>Farbox</li>
+<li>………</li>
+</ul>
+<p>看了看以上的優缺點，覺得Hexo算是最好上手、安裝最簡潔的，就決定用他了。</p>
+<p>Hexo是用Node.js製成的，比起用Ruby寫的<a href="https://github.com/mojombo/jekyll" target="_blank" rel="external">Jekyll</a>和<a href="http://octopress.org/" target="_blank" rel="external">Octopress</a>在檔案的Generate方面快上許多。</p>
+<h3 id="安裝Node-js">安裝Node.js</h3>
+<p>由於是由Node.js開發的，必須先安裝Node.js，Windows的Node.js安裝非常簡單，只要去<a href="http://nodejs.org/" target="_blank" rel="external">Node.js官網</a>按下Install下載安裝就好了<strong>(注意要將npm add到PATH裡面去，否則無法在Windows Prompt下執行npm)</strong></p>
+<h3 id="安裝Hexo">安裝Hexo</h3>
+<ol>
+<li>在Windows Prompt下執行</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm <span class="operator"><span class="keyword">install</span> hexo -g	</span></div></pre></td></tr></table></figure>
+
+
+<ol>
+<li>在本機端選擇，要安裝Blog資料夾的位置並執行以下指令，會將hexo初始化並安裝於blog這個資料夾中</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hexo <span class="keyword">init</span> blog</div></pre></td></tr></table></figure>
+
+
+<ol>
+<li>移動到blog資料夾中</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> blog</div></pre></td></tr></table></figure>
+
+<ol>
+<li>執行以下指令，會將Node Package Module安裝於該資料夾，Hexo才能跑</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm <span class="operator"><span class="keyword">install</span></span></div></pre></td></tr></table></figure>
+
+<ol>
+<li>Load  <strong>blog/source/_posts/</strong> 內的Markdown檔，並產生他們的Blog網頁</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hexo <span class="keyword">generate</span></div></pre></td></tr></table></figure>
+
+<ol>
+<li>開啟Server，用於本機測試用，可以打開<a href="http://localhost:4000/" target="_blank" rel="external">http://localhost:4000/</a>來查看Blog是否正常產生與顯示</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hexo <span class="keyword">server</span></div></pre></td></tr></table></figure>
+
+<h4 id="新增文章">新增文章</h4>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ hexo <span class="keyword">new</span> [layout] &lt;title&gt;</div><div class="line"></div><div class="line">$ hexo <span class="keyword">new</span> <span class="string">"New Post"</span></div><div class="line"># =&gt; The <span class="keyword">file</span> will <span class="keyword">be</span> created at <span class="keyword">source</span>/_posts/<span class="keyword">new</span>-post.md</div><div class="line">$ hexo <span class="keyword">new</span> page <span class="string">"New Page"</span></div><div class="line"># =&gt; The <span class="keyword">file</span> will <span class="keyword">be</span> created at <span class="keyword">source</span>/<span class="keyword">new</span>-page/<span class="built_in">index</span>.html</div><div class="line">$ hexo <span class="keyword">new</span> draft <span class="string">"New Draft"</span></div><div class="line"># =&gt; The <span class="keyword">file</span> will <span class="keyword">be</span> created at <span class="keyword">source</span>/_drafts/<span class="keyword">new</span>-draft.md</div></pre></td></tr></table></figure>
+
+
+<p><strong>記得post完新增的.md後 要重新<code>hexo generate</code>才會有該.md的Blog產生</strong></p>
+]]></content>
+    
+    
+  </entry>
   
   <entry>
     <title><![CDATA[[Linux-Kernel][新增System Call]]]></title>
@@ -697,24 +760,6 @@
 <p>依舊下著雨<br> ]]></summary>
     
       <category term="[遊]" scheme="http://blake31113.github.io/tags/-%E9%81%8A/"/>
-    
-  </entry>
-  
-  <entry>
-    <title><![CDATA[Summer Vacation!!]]></title>
-    <link href="http://blake31113.github.io/2012/06/22/Summer-Vacation!!/"/>
-    <id>http://blake31113.github.io/2012/06/22/Summer-Vacation!!/</id>
-    <published>2012-06-22T06:50:00.000Z</published>
-    <updated>2014-07-12T06:17:50.000Z</updated>
-    <content type="html"><![CDATA[<p>Finally, I completed the final exam of the computer science.</p>
-<p>I think The level of the the computer science is too high to test our.<br>I heard that this test will test transfer students who want to study in NCU CSIE from teaching assistant.<br>WTF…</p>
-<p>Go back to the dormitory.<br>After I pack my package, I took some picture of roommates and &nbsp;room 418 which contains lots of memories.</p>
-<p>Sign….</p>
-<p>Thank my roommates!</p>
-]]></content>
-    
-    
-      <category term="[雜言]" scheme="http://blake31113.github.io/tags/-%E9%9B%9C%E8%A8%80/"/>
     
   </entry>
   
