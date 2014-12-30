@@ -4,7 +4,7 @@
   <subtitle><![CDATA[by Blake]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://blake31113.github.io/"/>
-  <updated>2014-12-14T11:02:05.079Z</updated>
+  <updated>2014-12-30T08:25:49.972Z</updated>
   <id>http://blake31113.github.io/</id>
   
   <author>
@@ -15,11 +15,47 @@
   <generator uri="http://zespia.tw/hexo/">Hexo</generator>
   
   <entry>
+    <title><![CDATA[[Linux-Kernel][紀錄Process Context Switch次數和idle time]]]></title>
+    <link href="http://blake31113.github.io/2014/12/30/%5BLinux-Kernel%5D%5B%E7%B4%80%E9%8C%84Process%20Context%20Switch%E6%AC%A1%E6%95%B8%E5%92%8Cidle%20time%5D/"/>
+    <id>http://blake31113.github.io/2014/12/30/[Linux-Kernel][紀錄Process Context Switch次數和idle time]/</id>
+    <published>2014-12-30T08:00:00.000Z</published>
+    <updated>2014-12-30T08:23:53.000Z</updated>
+    <content type="html"><![CDATA[<h3 id="紀錄Process_Context_Switch次數和idle_time">紀錄Process Context Switch次數和idle time</h3>
+<ol>
+<li><p>在linux/sched.h中的struct task_struct的最後（”#endif”之後，”};”之前）加入<br><figure class="highlight"><figcaption><span>linux/sched.h</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">unsigned</span> <span class="keyword">int</span> cs_count;</div><div class="line"><span class="keyword">struct</span> timeval time_value;</div></pre></td></tr></table></figure><br>如果將該變數加到task_struct中的任意位置，會產生問題，因為context switch是靠固定的位移記憶體大小來得到task_struct其中的變數，交換process的。</p>
+</li>
+<li><p>在linux/sched.h中加入<br><figure class="highlight"><figcaption><span>linux/sched.h</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">process_switch_info</span></span></div><div class="line">{</div><div class="line">	unsigned int   counter_cpu, counter_IO;</div><div class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">timeval</span> time_cpu, time_IO;</span></div><div class="line">};</div></pre></td></tr></table></figure><br>為了讓之後的systemcall-get_process_switch_info(struct process_switch_info *, int, int)可以傳入struct process_switch_info的變數</p>
+</li>
+<li><p>在kernel/fork.c中return p之前加入<br><figure class="highlight"><figcaption><span>kernel/fork.c</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">p-&gt;cs_count=<span class="number">0</span>;</div><div class="line">p-&gt;time_value.tv_sec=<span class="number">0</span>;</div><div class="line">p-&gt;time_value.tv_usec=<span class="number">0</span>;</div></pre></td></tr></table></figure><br>將其值初始化</p>
+</li>
+<li><p>在kernel/sched/core.c中 context_switch(rq,prev,next)前後加上<br><figure class="highlight"><figcaption><span>kernel/sched/core.c</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">next</span>-&gt;cs_count++;</div><div class="line">context_switch(rq,<span class="keyword">prev</span>,<span class="keyword">next</span>)</div><div class="line"><span class="keyword">prev</span>-&gt;cs_count++;</div></pre></td></tr></table></figure><br>在context switch之前 next的計數器+1，因為要準備switch過去next了;在context switch之後prev的計數器+1，因為已經switch回來了</p>
+</li>
+<li><p>記得在include/linux/syscall.h裡面#include <linux sched.h=""><br>因為system call裡面會用到在sched.h宣告的struct process_switch_info<br><strong>如果在其他地方宣告struct process_switch_info，即要換成include那個</strong></linux></p>
+</li>
+<li><p>在arch/x86/kernel新增gpsi.c，system call - get_process_switch_info如下</p>
+<figure class="highlight"><figcaption><span>arch/x86/kernel/gpsi.c</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include &lt;linux/linkage.h&gt;</span></div><div class="line"><span class="comment">#include &lt;linux/kernel.h&gt;</span></div><div class="line"><span class="comment">#include &lt;linux/sched.h&gt;</span></div><div class="line"><span class="comment">#include &lt;linux/mm_types.h&gt;</span></div><div class="line"><span class="comment">#include &lt;linux/fs.h&gt;</span></div><div class="line"><span class="comment">#include &lt;linux/mm.h&gt;</span></div><div class="line"><span class="comment">#include &lt;linux/time.h&gt;</span></div><div class="line">asmlinkage void get_process_switch_info(struct process_switch_info * psi, int pid1, int pid2)</div><div class="line">{</div><div class="line">	struct process_switch_info* info;</div><div class="line">	info=psi;</div><div class="line">	struct task_struct *task_list;</div><div class="line">	struct task_struct *process1;</div><div class="line">	struct task_struct *process2;</div><div class="line">	for_each_process(task_list)</div><div class="line">	{</div><div class="line">		if(task_list-&gt;pid==pid1)</div><div class="line">		{</div><div class="line">			process1=task_list;</div><div class="line">		}</div><div class="line">		else if(task_list-&gt;pid==pid2)</div><div class="line">		{</div><div class="line">			process2=task_list;</div><div class="line">		}</div><div class="line">	}</div><div class="line">	if(process1&amp;&amp;process2)</div><div class="line">	{</div><div class="line">		info-&gt;counter_cpu		=process1-&gt;cs_count;</div><div class="line">		info-&gt;counter_IO		=process2-&gt;cs_count;</div><div class="line"></div><div class="line">		info-&gt;time_cpu.tv_sec	=process1-&gt;time_value.tv_sec;</div><div class="line">		info-&gt;time_cpu.tv_usec	=process1-&gt;time_value.tv_usec;</div><div class="line">		info-&gt;time_IO.tv_sec	=process2-&gt;time_value.tv_sec;</div><div class="line">		info-&gt;time_IO.tv_usec	=process2-&gt;time_value.tv_usec;</div><div class="line">	}</div><div class="line">	else</div><div class="line">	{</div><div class="line">		printk(<span class="string">"\nprocess1(PID:%d) or process2(PID:%d) not found\n"</span>,pid1,pid2);</div><div class="line">		return 0;</div><div class="line">	}</div><div class="line">	return 0;</div><div class="line">}</div></pre></td></tr></table></figure>
+</li>
+<li><p>make modules_install</p>
+</li>
+<li>make install</li>
+</ol>
+]]></content>
+    
+    
+      <category term="[分享]" scheme="http://blake31113.github.io/tags/-%E5%88%86%E4%BA%AB/"/>
+    
+      <category term="[Linux-Kernel]" scheme="http://blake31113.github.io/tags/-Linux-Kernel/"/>
+    
+      <category term="[Ubuntu]" scheme="http://blake31113.github.io/tags/-Ubuntu/"/>
+    
+  </entry>
+  
+  <entry>
     <title><![CDATA[[Linux-Kernel][新增System Call]]]></title>
     <link href="http://blake31113.github.io/2014/11/17/%5BLinux-Kernel%5D%5B%E6%96%B0%E5%A2%9ESystem%20Call%5D/"/>
     <id>http://blake31113.github.io/2014/11/17/[Linux-Kernel][新增System Call]/</id>
     <published>2014-11-17T02:09:00.000Z</published>
-    <updated>2014-11-17T14:34:35.000Z</updated>
+    <updated>2014-12-29T13:38:28.000Z</updated>
     <content type="html"><![CDATA[<h3 id="Linux-Kernel_新增System_Call">Linux-Kernel 新增System Call</h3>
 <p>我的環境是 OS:Ubuntu 14.04 LTS(32bits-i386)  CPU:i7-2600<br>    Linux版本為linux-3.10.60</p>
 <ol>
@@ -697,24 +733,6 @@
 <p>依舊下著雨<br> ]]></summary>
     
       <category term="[遊]" scheme="http://blake31113.github.io/tags/-%E9%81%8A/"/>
-    
-  </entry>
-  
-  <entry>
-    <title><![CDATA[Summer Vacation!!]]></title>
-    <link href="http://blake31113.github.io/2012/06/22/Summer-Vacation!!/"/>
-    <id>http://blake31113.github.io/2012/06/22/Summer-Vacation!!/</id>
-    <published>2012-06-22T06:50:00.000Z</published>
-    <updated>2014-07-12T06:17:50.000Z</updated>
-    <content type="html"><![CDATA[<p>Finally, I completed the final exam of the computer science.</p>
-<p>I think The level of the the computer science is too high to test our.<br>I heard that this test will test transfer students who want to study in NCU CSIE from teaching assistant.<br>WTF…</p>
-<p>Go back to the dormitory.<br>After I pack my package, I took some picture of roommates and &nbsp;room 418 which contains lots of memories.</p>
-<p>Sign….</p>
-<p>Thank my roommates!</p>
-]]></content>
-    
-    
-      <category term="[雜言]" scheme="http://blake31113.github.io/tags/-%E9%9B%9C%E8%A8%80/"/>
     
   </entry>
   
